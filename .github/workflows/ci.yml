@@ -24,12 +24,9 @@ jobs:
     
     - name: Run tests
       run: npm run test:run
-      continue-on-error: true
-    
+
     - name: Build
       run: npm run build
-      continue-on-error: true
-    
+
     - name: Lint
       run: npm run lint
-      continue-on-error: true
