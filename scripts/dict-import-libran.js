@@ -3,7 +3,41 @@
 const fs = require('fs');
 const path = require('path');
 
-function main() {
+// Default configuration
+const DEFAULT_CONFIG = {
+  json: 'data/UnifiedLibranDictionaryv1.7.0.json',
+  output: 'lib/translator/dictionaries'
+};
+
+function showHelp() {
+  console.log(`
+Librán Dictionary Importer
+
+Usage: pnpm dict:import-libran [options]
+
+Options:
+  --json <path>      Path to Librán dictionary JSON file (default: ${DEFAULT_CONFIG.json})
+  --output <path>    Output directory for dictionaries (default: ${DEFAULT_CONFIG.output})
+  --help, -h         Show this help message
+
+Examples:
+  pnpm dict:import-libran
+  pnpm dict:import-libran --json data/my-dictionary.json
+  pnpm dict:import-libran --output build/dictionaries
+
+The script will:
+1. Read the Librán dictionary JSON file
+2. Parse the cluster-based structure
+3. Extract ancient and modern entries
+4. Generate ancient.json and modern.json dictionaries
+5. Save them to the specified output directory
+
+This importer is specifically designed for the Librán dictionary format
+with clusters containing ancient and modern sections.
+`);
+}
+
+function parseArgs() {
   const args = process.argv.slice(2);
   
   let jsonFile = null;
