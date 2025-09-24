@@ -16,6 +16,7 @@ async function handleSpeakRequest(request: NextRequest) {
   let audioDuration = 0
   let libranText = ''
   let voice = 'alloy'
+  let selectedVoice: Voice = 'alloy' // Initialize selectedVoice for error handling
   const requestId = generateCorrelationId()
 
   log.apiRequest('POST', '/api/speak', requestId)
@@ -50,7 +51,7 @@ async function handleSpeakRequest(request: NextRequest) {
     }
 
     // Select voice based on characteristics and accent
-    let selectedVoice = voice as Voice;
+    selectedVoice = voice as Voice;
     const accentOverride = requestBody.accent;
     
     if (voiceFilter) {
@@ -130,9 +131,11 @@ async function handleSpeakRequest(request: NextRequest) {
       }
     })
 
-    // Check cache first
+    // Check cache first - use selectedVoice for cache key to prevent cache poisoning
     const model = process.env.OPENAI_TTS_MODEL ?? 'gpt-4o-mini-tts'
-    const cacheKey = ttsCache.generateHash(libranText, voice, format, model)
+    // Include accent and filter info in cache key for maximum specificity
+    const cacheKeySuffix = `${selectedVoice}${accentOverride ? `|accent:${accentOverride}` : ''}${voiceFilter ? `|filter:${voiceFilter.prompt?.slice(0, 50)}` : ''}`
+    const cacheKey = ttsCache.generateHash(libranText, cacheKeySuffix, format, model)
     
     let audioBuffer: Buffer
     let isCacheHit = false
@@ -142,7 +145,7 @@ async function handleSpeakRequest(request: NextRequest) {
     if (cachedAudio) {
       audioBuffer = cachedAudio
       isCacheHit = true
-      log.ttsCacheHit(libranText, voice, requestId, { cacheKey, bufferSize: audioBuffer.length })
+      log.ttsCacheHit(libranText, selectedVoice, requestId, { cacheKey, bufferSize: audioBuffer.length })
     } else {
       // Generate new audio using OpenAI TTS
       log.info('TTS cache miss, generating new audio', {
@@ -186,7 +189,7 @@ async function handleSpeakRequest(request: NextRequest) {
       await ttsCache.storeCachedAudio(
         cacheKey,
         libranText,
-        voice,
+        cacheKeySuffix,
         format,
         model,
         audioBuffer,
@@ -201,7 +204,7 @@ async function handleSpeakRequest(request: NextRequest) {
     audioDuration = (wordCount / 150) * 60 // seconds
 
     // Log TTS generation completion
-    log.tts(libranText, voice, audioDuration * 1000, requestId, {
+    log.tts(libranText, selectedVoice, audioDuration * 1000, requestId, {
       format,
       wordCount,
       bufferSize: audioBuffer.length,
@@ -241,14 +244,14 @@ async function handleSpeakRequest(request: NextRequest) {
     // Handle specific OpenAI errors
     if (error.status === 429) {
       const errorResponse = createErrorResponse(ErrorCode.OPENAI_QUOTA_EXCEEDED, { requestId })
-      log.ttsRateLimit(libranText || '', voice || 'alloy', requestId, { error: errorMessage })
+      log.ttsRateLimit(libranText || '', selectedVoice || 'alloy', requestId, { error: errorMessage })
       metrics.recordError('openai_quota_error', 'OpenAI quota exceeded')
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
 
     if (error.type === 'insufficient_quota') {
       const errorResponse = createErrorResponse(ErrorCode.OPENAI_QUOTA_EXCEEDED, { requestId })
-      log.ttsRateLimit(libranText || '', voice || 'alloy', requestId, { error: errorMessage })
+      log.ttsRateLimit(libranText || '', selectedVoice || 'alloy', requestId, { error: errorMessage })
       metrics.recordError('openai_quota_error', 'OpenAI insufficient quota')
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
