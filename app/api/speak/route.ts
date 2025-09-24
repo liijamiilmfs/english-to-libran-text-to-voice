@@ -5,6 +5,8 @@ import { log, generateCorrelationId, LogEvents } from '@/lib/logger'
 import { ttsCache } from '@/lib/tts-cache'
 import { withGuardrails } from '@/lib/api-guardrails'
 import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
+import { VOICE_PROFILES, Voice } from '@/lib/voices'
+import type { VoiceCharacteristics } from '@/lib/dynamic-voice-filter'
 
 async function handleSpeakRequest(request: NextRequest) {
   const startTime = Date.now()
@@ -22,6 +24,7 @@ async function handleSpeakRequest(request: NextRequest) {
     libranText = requestBody.libranText || ''
     voice = requestBody.voice || (process.env.OPENAI_TTS_VOICE ?? 'alloy')
     const format = requestBody.format || (process.env.AUDIO_FORMAT ?? 'mp3')
+    const voiceFilter = requestBody.voiceFilter as { characteristics: VoiceCharacteristics; prompt: string } | undefined
 
     if (!libranText || typeof libranText !== 'string') {
       const errorResponse = createErrorResponse(ErrorCode.VALIDATION_MISSING_TEXT, { requestId })
@@ -30,9 +33,9 @@ async function handleSpeakRequest(request: NextRequest) {
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
 
-    // Validate voice parameter
-    const validVoices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']
-    if (!validVoices.includes(voice)) {
+    // Validate voice parameter using the enhanced voice system
+    const validVoices = Object.keys(VOICE_PROFILES) as Voice[]
+    if (!validVoices.includes(voice as Voice)) {
       const errorResponse = createErrorResponse(ErrorCode.VALIDATION_INVALID_VOICE, { requestId, voice })
       log.validationFail('voice', 'Invalid voice parameter', requestId, { voice })
       metrics.recordError('validation_error', 'Invalid voice parameter')
@@ -49,10 +52,22 @@ async function handleSpeakRequest(request: NextRequest) {
     }
 
     characterCount = libranText.length
+    
+    // Log voice selection with enhanced metadata
+    const voiceProfile = VOICE_PROFILES[voice as Voice]
     log.info('Starting TTS generation', {
       event: LogEvents.TTS_START,
       corr_id: requestId,
-      ctx: { text_length: libranText.length, voice, format }
+      ctx: { 
+        text_length: libranText.length, 
+        voice, 
+        voice_characteristics: voiceProfile.characteristics,
+        voice_mood: voiceProfile.mood,
+        voice_suitability: voiceProfile.libránSuitability,
+        format,
+        has_voice_filter: !!voiceFilter,
+        voice_filter_prompt: voiceFilter?.prompt
+      }
     })
 
     // Check cache first
@@ -79,11 +94,17 @@ async function handleSpeakRequest(request: NextRequest) {
         apiKey: process.env.OPENAI_API_KEY! 
       });
       
+      // Apply voice filter characteristics if provided
+      const speed = voiceFilter 
+        ? voiceFilter.characteristics.speed 
+        : voiceProfile.energy === 'low' ? 0.7 : voiceProfile.energy === 'high' ? 1.2 : 1.0
+
       const response = await client.audio.speech.create({
         model: model,
         voice: voice as any,
         input: libranText,
         response_format: format as any,
+        speed: speed
       });
 
       audioBuffer = Buffer.from(await response.arrayBuffer())
@@ -137,6 +158,7 @@ async function handleSpeakRequest(request: NextRequest) {
       headers.set('X-Cache-Status', 'MISS')
     }
     headers.set('Content-Disposition', `attachment; filename="libran-audio.${format}"`)
+    headers.set('X-Voice-Profile', JSON.stringify(voiceProfile))
 
     return new NextResponse(audioBuffer as any, {
       status: 200,

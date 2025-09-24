@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { VOICES, DEFAULT_VOICE, VOICE_LABELS } from '@/lib/voices'
+import { VOICES, DEFAULT_VOICE, VOICE_LABELS, VoiceProfile } from '@/lib/voices'
+import type { VoiceFilter } from '@/lib/dynamic-voice-filter'
 import TranslationForm from './components/TranslationForm'
 import TranslationResult from './components/TranslationResult'
 import AudioDownloadButton from './components/AudioDownloadButton'
 import PhrasePicker from './components/PhrasePicker'
+import DynamicVoiceFilter from './components/DynamicVoiceFilter'
 import { generateFilename } from '@/lib/clipboard-utils'
 import type { Phrase } from '@/lib/types/phrase'
 
@@ -13,7 +15,8 @@ export default function Home() {
   const [inputText, setInputText] = useState('')
   const [variant, setVariant] = useState<'ancient' | 'modern'>('ancient')
   const [libranText, setLibranText] = useState('')
-  const [selectedVoice, setSelectedVoice] = useState(DEFAULT_VOICE)
+  const [selectedVoice, setSelectedVoice] = useState<VoiceProfile | null>(null)
+  const [selectedVoiceFilter, setSelectedVoiceFilter] = useState<VoiceFilter | null>(null)
   const [audioUrl, setAudioUrl] = useState('')
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [isTranslating, setIsTranslating] = useState(false)
@@ -22,6 +25,7 @@ export default function Home() {
     confidence?: number
     wordCount?: number
   }>({})
+  const [showVoiceFilter, setShowVoiceFilter] = useState(false)
 
   const handleTranslation = (translatedText: string, selectedVariant: 'ancient' | 'modern', originalText: string, translationData?: { confidence?: number, wordCount?: number }) => {
     setLibranText(translatedText)
@@ -65,8 +69,26 @@ export default function Home() {
     })
   }
 
+  const handleVoiceSelect = (voice: VoiceProfile) => {
+    setSelectedVoice(voice)
+    setShowVoiceFilter(false)
+  }
+
+  const handleVoiceFilterSelect = (filter: VoiceFilter) => {
+    setSelectedVoiceFilter(filter)
+    setShowVoiceFilter(false)
+  }
+
   const handleSpeak = async () => {
-    if (!libranText.trim()) return
+    if (!libranText.trim()) {
+      alert('Please translate some text first')
+      return
+    }
+
+    if (!selectedVoice && !selectedVoiceFilter) {
+      alert('Please select a voice or voice filter first')
+      return
+    }
 
     setIsGenerating(true)
     try {
@@ -75,8 +97,12 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           libranText, 
-          voice: selectedVoice,
-          format: 'mp3'
+          voice: selectedVoice?.id || 'alloy',
+          format: 'mp3',
+          voiceFilter: selectedVoiceFilter ? {
+            characteristics: selectedVoiceFilter.characteristics,
+            prompt: selectedVoiceFilter.prompt
+          } : undefined
         })
       })
 
@@ -143,29 +169,72 @@ export default function Home() {
 
                 {/* Voice Selection */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Voice:
-                  </label>
-                  <select
-                    value={selectedVoice}
-                    onChange={(e) => setSelectedVoice(e.target.value as any)}
-                    className="input-field"
-                  >
-                    {VOICES.map(voice => (
-                      <option key={voice} value={voice}>
-                        {VOICE_LABELS[voice]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-300">
+                      Voice:
+                    </label>
+                    <button
+                      onClick={() => setShowVoiceFilter(!showVoiceFilter)}
+                      className="text-sm text-libran-gold hover:underline"
+                    >
+                      {showVoiceFilter ? 'Hide Filter' : 'Advanced Filter'}
+                    </button>
+                  </div>
+                  
+                  {selectedVoice ? (
+                    <div className="p-3 bg-libran-accent/10 border border-libran-accent/30 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-white">{selectedVoice.name}</div>
+                          <div className="text-sm text-gray-400">{selectedVoice.description}</div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedVoice(null)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ) : selectedVoiceFilter ? (
+                    <div className="p-3 bg-libran-gold/10 border border-libran-gold/30 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-white">{selectedVoiceFilter.name}</div>
+                          <div className="text-sm text-gray-400">{selectedVoiceFilter.prompt}</div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedVoiceFilter(null)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-libran-dark border border-libran-accent rounded-lg text-center text-gray-400">
+                      No voice selected. Use the filter below to choose a voice or create a custom voice filter.
+                    </div>
+                  )}
                 </div>
+
+                {/* Voice Filter */}
+                {showVoiceFilter && (
+                  <div className="mb-4">
+                    <DynamicVoiceFilter
+                      onVoiceFilterSelect={handleVoiceFilterSelect}
+                      selectedFilter={selectedVoiceFilter || undefined}
+                    />
+                  </div>
+                )}
 
                 {/* Speak Button */}
                 <button
                   onClick={handleSpeak}
-                  disabled={!libranText.trim() || isGenerating}
+                  disabled={!libranText.trim() || isGenerating || (!selectedVoice && !selectedVoiceFilter)}
                   className="btn-primary w-full mb-4"
                 >
-                  {isGenerating ? 'Generating...' : 'Speak'}
+                  {isGenerating ? 'Generating...' : (!selectedVoice && !selectedVoiceFilter) ? 'Select Voice First' : 'Speak'}
                 </button>
 
                 {/* Audio Player */}
