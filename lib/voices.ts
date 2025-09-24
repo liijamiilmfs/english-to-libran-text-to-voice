@@ -137,6 +137,10 @@ export function selectVoiceForCharacteristics(characteristics: any, accentOverri
   console.log('Input characteristics:', characteristics);
   console.log('Accent override:', accentOverride);
   
+  // Extract the actual characteristics object - it might be nested
+  const actualCharacteristics = characteristics.characteristics || characteristics;
+  console.log('Actual characteristics:', actualCharacteristics);
+  
   const words = characteristics.prompt?.toLowerCase().split(/\s+/) || [];
   console.log('Words from prompt:', words);
   
@@ -184,20 +188,20 @@ export function selectVoiceForCharacteristics(characteristics: any, accentOverri
   for (const voice of candidateVoices) {
     let score = 0;
     
-    // Pitch matching
-    if (characteristics.pitch < 0.7 && voice.pitch === 'low') score += 3;
-    else if (characteristics.pitch > 1.3 && voice.pitch === 'high') score += 3;
-    else if (characteristics.pitch >= 0.7 && characteristics.pitch <= 1.3 && voice.pitch === 'medium') score += 2;
+    // Pitch matching - use actualCharacteristics instead of characteristics
+    if (actualCharacteristics.pitch < 0.7 && voice.pitch === 'low') score += 3;
+    else if (actualCharacteristics.pitch > 1.3 && voice.pitch === 'high') score += 3;
+    else if (actualCharacteristics.pitch >= 0.7 && actualCharacteristics.pitch <= 1.3 && voice.pitch === 'medium') score += 2;
     
-    // Energy matching
-    if (characteristics.energy < 0.3 && voice.energy === 'low') score += 3;
-    else if (characteristics.energy > 0.7 && voice.energy === 'high') score += 3;
-    else if (characteristics.energy >= 0.3 && characteristics.energy <= 0.7 && voice.energy === 'medium') score += 2;
+    // Energy matching - use actualCharacteristics instead of characteristics
+    if (actualCharacteristics.energy < 0.3 && voice.energy === 'low') score += 3;
+    else if (actualCharacteristics.energy > 0.7 && voice.energy === 'high') score += 3;
+    else if (actualCharacteristics.energy >= 0.3 && actualCharacteristics.energy <= 0.7 && voice.energy === 'medium') score += 2;
     
-    // Formality matching
-    if (characteristics.formality > 0.7 && voice.formality === 'ceremonial') score += 3;
-    else if (characteristics.formality > 0.5 && voice.formality === 'formal') score += 2;
-    else if (characteristics.formality < 0.3 && voice.formality === 'casual') score += 2;
+    // Formality matching - use actualCharacteristics instead of characteristics
+    if (actualCharacteristics.formality > 0.7 && voice.formality === 'ceremonial') score += 3;
+    else if (actualCharacteristics.formality > 0.5 && voice.formality === 'formal') score += 2;
+    else if (actualCharacteristics.formality < 0.3 && voice.formality === 'casual') score += 2;
     
       // Librán accent bonus
       if (accentOverride === 'libran' && voice.libránSuitability >= 7) {
