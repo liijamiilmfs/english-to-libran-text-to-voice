@@ -53,14 +53,17 @@ function assertEnvironmentVariable(name: string, value: string | undefined): ass
 function sanitizeTextForElevenLabs(text: string): string {
   // Replace problematic Unicode characters that ElevenLabs can't handle
   return text
-    .replace(/–/g, '-') // Replace em dash with regular dash
-    .replace(/—/g, '-') // Replace en dash with regular dash
+    .replace(/–/g, '-') // Replace em dash (8211) with regular dash
+    .replace(/—/g, '-') // Replace en dash (8212) with regular dash
     .replace(/"/g, '"') // Replace smart quotes with regular quotes
     .replace(/"/g, '"')
     .replace(/'/g, "'") // Replace smart apostrophes with regular apostrophes
     .replace(/'/g, "'")
     .replace(/…/g, '...') // Replace ellipsis with three dots
     .replace(/[^\x00-\x7F]/g, '?') // Replace any remaining non-ASCII characters with ?
+    .replace(/[\u2010-\u2015]/g, '-') // Replace various dash characters
+    .replace(/[\u2018-\u2019]/g, "'") // Replace various apostrophe characters
+    .replace(/[\u201C-\u201D]/g, '"') // Replace various quote characters
 }
 
 async function callElevenLabs(
@@ -78,18 +81,19 @@ async function callElevenLabs(
   // Sanitize text for ElevenLabs compatibility
   const sanitizedText = sanitizeTextForElevenLabs(text)
   
-  if (sanitizedText !== text) {
-    log.info('Text sanitized for ElevenLabs', {
-      event: LogEvents.TTS_START,
-      corr_id: requestId,
-      ctx: {
-        original_length: text.length,
-        sanitized_length: sanitizedText.length,
-        original_text: text.slice(0, 100),
-        sanitized_text: sanitizedText.slice(0, 100)
-      }
-    })
-  }
+  // Always log the sanitization for debugging
+  log.info('Text sanitization for ElevenLabs', {
+    event: LogEvents.TTS_START,
+    corr_id: requestId,
+    ctx: {
+      original_length: text.length,
+      sanitized_length: sanitizedText.length,
+      original_text: text.slice(0, 100),
+      sanitized_text: sanitizedText.slice(0, 100),
+      was_sanitized: sanitizedText !== text,
+      original_chars: text.split('').map((c, i) => ({ char: c, code: c.charCodeAt(0), index: i })).filter(c => c.code > 127).slice(0, 10)
+    }
+  })
 
   const modelId = process.env.ELEVENLABS_MODEL_ID ?? DEFAULT_ELEVEN_MODEL
   const outputFormat = process.env.ELEVENLABS_OUTPUT_FORMAT ?? DEFAULT_ELEVEN_OUTPUT_FORMAT
