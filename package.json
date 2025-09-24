@@ -32,6 +32,12 @@
     "dict:build": "node scripts/dict-build.js",
     "dict:import": "node scripts/dict-import.js",
     "dict:import-libran": "node scripts/dict-import-libran.js",
+    "batch-render": "node scripts/batch-render.js",
+    "ml:setup": "node scripts/ml-setup.js",
+    "ml:train": "node tools/ml/training/train_libran_model.js",
+    "ml:tokenizer": "node tools/ml/tokenizer/libran_tokenizer.js",
+    "ml:corpus": "node tools/ml/training/data_preparation.js",
+    "ml:evaluate": "node tools/ml/training/model_evaluation.js",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
     "release:major": "standard-version --release-as major",
@@ -48,7 +54,12 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "@huggingface/transformers": "^2.6.0",
+    "datasets": "^2.14.0",
+    "accelerate": "^0.24.0",
+    "evaluate": "^0.4.0",
+    "wandb": "^0.15.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
@@ -68,7 +79,10 @@
     "tailwindcss": "^3.4.0",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.2.0",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "jupyter": "^1.0.0",
+    "notebook": "^6.5.0",
+    "tensorboard": "^2.14.0"
   },
   "engines": {
     "node": ">=20.17.0"
