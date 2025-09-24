@@ -43,6 +43,9 @@ English Text → Librán Translation → AI Voice Synthesis → Audio Output
 - **Multiple Audio Formats**: MP3, WAV, and FLAC output support
 - **Real-time Processing**: Fast translation and synthesis pipeline
 - **Modern Web Interface**: Built with Next.js and Tailwind CSS
+- **ML Infrastructure**: Complete machine learning pipeline for language model training and inference
+- **Advanced Analysis**: Dictionary analysis with inconsistency detection and improvement suggestions
+- **Model Training**: Train custom Librán language models with comprehensive evaluation
 
 ## Quick Start
 
@@ -97,6 +100,31 @@ curl -X POST http://localhost:3000/api/speak \
   -d '{"libranText": "Salaam, samaa!", "voice": "alloy", "format": "mp3"}' \
   --output test-audio.mp3
 ```
+
+### ML Infrastructure Usage
+
+The project includes a complete machine learning pipeline for training Librán language models:
+
+```bash
+# Initialize ML environment
+npm run ml:setup
+
+# Prepare training data from dictionaries
+npm run ml:corpus
+
+# Build Librán-specific tokenizer
+npm run ml:tokenizer
+
+# Train language model
+npm run ml:train
+
+# Evaluate model performance
+npm run ml:evaluate
+```
+
+For detailed ML documentation, see:
+- [ML Infrastructure Guide](./docs/ML_INFRASTRUCTURE.md) - Comprehensive ML documentation
+- [ML Quick Reference](./docs/ML_QUICK_REFERENCE.md) - Quick command reference
 
 ## Development & Testing
 
@@ -208,23 +236,32 @@ The deterministic translation system ensures consistency across projects, while 
 - [x] Web interface
 - [x] Audio file generation
 
-### Phase 2: LLM Polish
+### Phase 2: ML Infrastructure ✅
+- [x] Complete ML pipeline for language model training
+- [x] Data preparation and corpus generation
+- [x] Custom tokenizer for Librán language
+- [x] Model training with progress tracking
+- [x] Comprehensive model evaluation
+- [x] Dictionary analysis and improvement suggestions
+- [x] Model inference for vocabulary generation and translation
+
+### Phase 3: LLM Polish
 - [ ] Enhanced translation accuracy with LLM assistance
 - [ ] Context-aware translation
 - [ ] Idiom and phrase handling
 
-### Phase 3: Realtime Mode
+### Phase 4: Realtime Mode
 - [ ] Live translation during typing
 - [ ] Real-time audio streaming
 - [ ] Voice activity detection
 
-### Phase 4: PDF Dictionary Import
+### Phase 5: PDF Dictionary Import
 - [ ] PDF table parsing for dictionary creation
 - [ ] Automated dictionary building from PDF sources
 - [ ] Enhanced conflict resolution for dictionary entries
 - [ ] *Note: PDF parsing functionality is available in `feature/pdf-parsing-future` branch*
 
-### Phase 5: Batch Rendering
+### Phase 6: Batch Rendering
 - [ ] Bulk text processing
 - [ ] Batch audio generation
 - [ ] Export multiple formats
