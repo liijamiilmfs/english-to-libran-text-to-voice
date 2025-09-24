@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Play, Save, Trash2, Volume2, Star, Plus, Settings, Wand2 } from 'lucide-react'
-import { VoiceProfile, VOICE_PROFILES } from '@/lib/voices'
+import { VoiceProfile, VOICE_PROFILES, VoiceAccent } from '@/lib/voices'
 import { 
   VoiceFilter, 
   createVoiceFilter, 
@@ -13,21 +13,26 @@ import {
   describeVoiceCharacteristics,
   characteristicsToTTSParams
 } from '@/lib/dynamic-voice-filter'
+import AccentSelector from './AccentSelector'
 
 interface IntegratedVoiceSelectorProps {
   onVoiceSelect: (voice: VoiceProfile | null) => void
   onVoiceFilterSelect: (filter: VoiceFilter | null) => void
+  onAccentChange: (accent: VoiceAccent | null) => void
   selectedVoice?: VoiceProfile | null
   selectedVoiceFilter?: VoiceFilter | null
+  selectedAccent?: VoiceAccent | null
   className?: string
 }
 
 export default function IntegratedVoiceSelector({ 
   onVoiceSelect, 
   onVoiceFilterSelect,
+  onAccentChange,
   selectedVoice,
   selectedVoiceFilter,
-  className = '' 
+  selectedAccent,
+  className = ''
 }: IntegratedVoiceSelectorProps) {
   const [activeTab, setActiveTab] = useState<'preset' | 'custom'>('preset')
   const [prompt, setPrompt] = useState('')
@@ -92,10 +97,7 @@ export default function IntegratedVoiceSelector({
     setIsGeneratingPreview(true)
     try {
       const sampleText = "Salaam dunya, kama ana huna al-yaum"
-      const voiceFilterData = {
-        characteristics: currentCharacteristics,
-        prompt: prompt
-      }
+      const voiceFilterData = createVoiceFilter(prompt, 'Preview Filter')
       
       console.log('Sending voice filter for preview:', voiceFilterData)
       
@@ -106,7 +108,10 @@ export default function IntegratedVoiceSelector({
           libranText: sampleText,
           voice: 'alloy',
           format: 'mp3',
-          voiceFilter: voiceFilterData
+          voiceFilter: {
+            characteristics: voiceFilterData.characteristics,
+            prompt: voiceFilterData.prompt
+          }
         })
       })
 
@@ -275,6 +280,14 @@ export default function IntegratedVoiceSelector({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Accent Selector */}
+          <div className="bg-libran-dark/50 border border-libran-gold/30 rounded-lg p-4">
+            <AccentSelector
+              selectedAccent={selectedAccent || null}
+              onAccentChange={onAccentChange}
+            />
           </div>
 
           {/* Saved Filters */}

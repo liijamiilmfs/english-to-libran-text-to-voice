@@ -49,18 +49,48 @@ async function handleSpeakRequest(request: NextRequest) {
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
 
-    // Select voice based on characteristics if voice filter is provided
+    // Select voice based on characteristics and accent
     let selectedVoice = voice as Voice;
+    const accentOverride = requestBody.accent;
+    
     if (voiceFilter) {
-      selectedVoice = selectVoiceForCharacteristics(voiceFilter);
-      log.info('Voice selected based on characteristics', {
-        corr_id: requestId,
-        ctx: {
-          originalVoice: voice,
-          selectedVoice: selectedVoice,
-          voiceFilterPrompt: voiceFilter.prompt
-        }
-      });
+      try {
+        selectedVoice = selectVoiceForCharacteristics(voiceFilter, accentOverride);
+        log.info('Voice selected based on characteristics and accent', {
+          corr_id: requestId,
+          ctx: {
+            originalVoice: voice,
+            selectedVoice: selectedVoice,
+            voiceFilterPrompt: voiceFilter.prompt,
+            accentOverride: accentOverride
+          }
+        });
+      } catch (error) {
+        log.error('Voice selection failed, using original voice', {
+          corr_id: requestId,
+          ctx: { error: error instanceof Error ? error.message : 'Unknown error', originalVoice: voice }
+        });
+        selectedVoice = voice as Voice;
+      }
+    } else if (accentOverride) {
+      // If no voice filter but accent is specified, select a voice with that accent
+      const voicesWithAccent = Object.values(VOICE_PROFILES).filter(v => v.accent === accentOverride);
+      if (voicesWithAccent.length > 0) {
+        selectedVoice = voicesWithAccent[0].id;
+        log.info('Voice selected based on accent only', {
+          corr_id: requestId,
+          ctx: {
+            originalVoice: voice,
+            selectedVoice: selectedVoice,
+            accentOverride: accentOverride
+          }
+        });
+      } else {
+        log.warn('No voices found with accent, using original voice', {
+          corr_id: requestId,
+          ctx: { accentOverride, originalVoice: voice }
+        });
+      }
     }
 
     // Validate voice parameter using the enhanced voice system

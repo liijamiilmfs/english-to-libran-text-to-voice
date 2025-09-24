@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Volume2 } from 'lucide-react'
-import { VOICES, DEFAULT_VOICE, VOICE_LABELS, VoiceProfile } from '@/lib/voices'
+import { VOICES, DEFAULT_VOICE, VOICE_LABELS, VoiceProfile, VoiceAccent } from '@/lib/voices'
 import type { VoiceFilter } from '@/lib/dynamic-voice-filter'
 import TranslationForm from './components/TranslationForm'
 import TranslationResult from './components/TranslationResult'
@@ -18,6 +18,7 @@ export default function Home() {
   const [libranText, setLibranText] = useState('')
   const [selectedVoice, setSelectedVoice] = useState<VoiceProfile | null>(null)
   const [selectedVoiceFilter, setSelectedVoiceFilter] = useState<VoiceFilter | null>(null)
+  const [selectedAccent, setSelectedAccent] = useState<VoiceAccent | null>(null)
   const [audioUrl, setAudioUrl] = useState('')
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [isTranslating, setIsTranslating] = useState(false)
@@ -80,6 +81,10 @@ export default function Home() {
     setShowVoiceSelector(false)
   }
 
+  const handleAccentChange = (accent: VoiceAccent | null) => {
+    setSelectedAccent(accent)
+  }
+
   const handleSpeak = async () => {
     if (!libranText.trim()) {
       alert('Please translate some text first')
@@ -97,6 +102,7 @@ export default function Home() {
         libranText, 
         voice: selectedVoice?.id || 'alloy',
         format: 'mp3',
+        accent: selectedAccent,
         voiceFilter: selectedVoiceFilter ? {
           characteristics: selectedVoiceFilter.characteristics,
           prompt: selectedVoiceFilter.prompt
@@ -106,7 +112,9 @@ export default function Home() {
       console.log('=== SENDING TTS REQUEST ===');
       console.log('Selected voice:', selectedVoice?.name || 'none');
       console.log('Selected voice filter:', selectedVoiceFilter?.name || 'none');
+      console.log('Selected accent:', selectedAccent || 'none');
       console.log('Request data:', requestData);
+      console.log('Libran text:', libranText);
       
       const response = await fetch('/api/speak', {
         method: 'POST',
@@ -208,6 +216,11 @@ export default function Home() {
                           </div>
                           <div className="text-sm text-gray-400">
                             {selectedVoice ? selectedVoice.description : selectedVoiceFilter?.prompt}
+                            {selectedAccent && (
+                              <div className="text-xs text-libran-gold mt-1">
+                                Accent: {selectedAccent.charAt(0).toUpperCase() + selectedAccent.slice(1).replace('-', ' ')}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <button
@@ -230,8 +243,10 @@ export default function Home() {
                     <IntegratedVoiceSelector
                       onVoiceSelect={handleVoiceSelect}
                       onVoiceFilterSelect={handleVoiceFilterSelect}
+                      onAccentChange={handleAccentChange}
                       selectedVoice={selectedVoice}
                       selectedVoiceFilter={selectedVoiceFilter}
+                      selectedAccent={selectedAccent}
                     />
                   </div>
                 )}
