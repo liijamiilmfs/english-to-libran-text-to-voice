@@ -16,7 +16,7 @@ export interface SimpleVoiceDefinition {
 const SIMPLE_VOICE_DEFINITIONS: SimpleVoiceDefinition[] = [
   {
     id: 'british-male',
-    label: 'Adam – British English',
+    label: 'Adam - British English',
     description: 'ElevenLabs male narrator with a natural British accent.',
     accent: 'british',
     provider: 'elevenlabs',
@@ -26,7 +26,7 @@ const SIMPLE_VOICE_DEFINITIONS: SimpleVoiceDefinition[] = [
   },
   {
     id: 'american-female',
-    label: 'Bella – American English',
+    label: 'Bella - American English',
     description: 'ElevenLabs female narrator with a clear American accent.',
     accent: 'american',
     provider: 'elevenlabs',
@@ -36,7 +36,7 @@ const SIMPLE_VOICE_DEFINITIONS: SimpleVoiceDefinition[] = [
   },
   {
     id: 'alloy-fallback',
-    label: 'Alloy – OpenAI Fallback',
+    label: 'Alloy - OpenAI Fallback',
     description: 'OpenAI alloy voice used when ElevenLabs is unavailable.',
     accent: 'neutral',
     provider: 'openai',
