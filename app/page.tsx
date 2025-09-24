@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { Volume2 } from 'lucide-react'
 import { VOICES, DEFAULT_VOICE, VOICE_LABELS, VoiceProfile } from '@/lib/voices'
 import type { VoiceFilter } from '@/lib/dynamic-voice-filter'
 import TranslationForm from './components/TranslationForm'
 import TranslationResult from './components/TranslationResult'
 import AudioDownloadButton from './components/AudioDownloadButton'
 import PhrasePicker from './components/PhrasePicker'
-import DynamicVoiceFilter from './components/DynamicVoiceFilter'
+import IntegratedVoiceSelector from './components/IntegratedVoiceSelector'
 import { generateFilename } from '@/lib/clipboard-utils'
 import type { Phrase } from '@/lib/types/phrase'
 
@@ -25,7 +26,7 @@ export default function Home() {
     confidence?: number
     wordCount?: number
   }>({})
-  const [showVoiceFilter, setShowVoiceFilter] = useState(false)
+  const [showVoiceSelector, setShowVoiceSelector] = useState(false)
 
   const handleTranslation = (translatedText: string, selectedVariant: 'ancient' | 'modern', originalText: string, translationData?: { confidence?: number, wordCount?: number }) => {
     setLibranText(translatedText)
@@ -69,14 +70,14 @@ export default function Home() {
     })
   }
 
-  const handleVoiceSelect = (voice: VoiceProfile) => {
+  const handleVoiceSelect = (voice: VoiceProfile | null) => {
     setSelectedVoice(voice)
-    setShowVoiceFilter(false)
+    setShowVoiceSelector(false)
   }
 
-  const handleVoiceFilterSelect = (filter: VoiceFilter) => {
+  const handleVoiceFilterSelect = (filter: VoiceFilter | null) => {
     setSelectedVoiceFilter(filter)
-    setShowVoiceFilter(false)
+    setShowVoiceSelector(false)
   }
 
   const handleSpeak = async () => {
@@ -92,18 +93,25 @@ export default function Home() {
 
     setIsGenerating(true)
     try {
+      const requestData = { 
+        libranText, 
+        voice: selectedVoice?.id || 'alloy',
+        format: 'mp3',
+        voiceFilter: selectedVoiceFilter ? {
+          characteristics: selectedVoiceFilter.characteristics,
+          prompt: selectedVoiceFilter.prompt
+        } : undefined
+      }
+      
+      console.log('=== SENDING TTS REQUEST ===');
+      console.log('Selected voice:', selectedVoice?.name || 'none');
+      console.log('Selected voice filter:', selectedVoiceFilter?.name || 'none');
+      console.log('Request data:', requestData);
+      
       const response = await fetch('/api/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          libranText, 
-          voice: selectedVoice?.id || 'alloy',
-          format: 'mp3',
-          voiceFilter: selectedVoiceFilter ? {
-            characteristics: selectedVoiceFilter.characteristics,
-            prompt: selectedVoiceFilter.prompt
-          } : undefined
-        })
+        body: JSON.stringify(requestData)
       })
 
       if (!response.ok) throw new Error('Speech generation failed')
@@ -169,61 +177,61 @@ export default function Home() {
 
                 {/* Voice Selection */}
                 <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-3">
                     <label className="block text-sm font-medium text-gray-300">
                       Voice:
                     </label>
                     <button
-                      onClick={() => setShowVoiceFilter(!showVoiceFilter)}
+                      onClick={() => setShowVoiceSelector(!showVoiceSelector)}
                       className="text-sm text-libran-gold hover:underline"
                     >
-                      {showVoiceFilter ? 'Hide Filter' : 'Advanced Filter'}
+                      {showVoiceSelector ? 'Hide Selector' : 'Choose Voice'}
                     </button>
                   </div>
                   
-                  {selectedVoice ? (
-                    <div className="p-3 bg-libran-accent/10 border border-libran-accent/30 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-white">{selectedVoice.name}</div>
-                          <div className="text-sm text-gray-400">{selectedVoice.description}</div>
-                        </div>
-                        <button
-                          onClick={() => setSelectedVoice(null)}
-                          className="text-gray-400 hover:text-white"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  ) : selectedVoiceFilter ? (
-                    <div className="p-3 bg-libran-gold/10 border border-libran-gold/30 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-white">{selectedVoiceFilter.name}</div>
-                          <div className="text-sm text-gray-400">{selectedVoiceFilter.prompt}</div>
-                        </div>
-                        <button
-                          onClick={() => setSelectedVoiceFilter(null)}
-                          className="text-gray-400 hover:text-white"
-                        >
-                          ×
-                        </button>
-                      </div>
+                  {!selectedVoice && !selectedVoiceFilter ? (
+                    <div className="p-4 bg-libran-dark border border-libran-accent rounded-lg text-center text-gray-400">
+                      <Volume2 className="w-8 h-8 mx-auto mb-2 text-gray-500" />
+                      <p className="text-sm">No voice selected</p>
+                      <p className="text-xs mt-1">Click &ldquo;Choose Voice&rdquo; to select a preset or create a custom voice</p>
                     </div>
                   ) : (
-                    <div className="p-3 bg-libran-dark border border-libran-accent rounded-lg text-center text-gray-400">
-                      No voice selected. Use the filter below to choose a voice or create a custom voice filter.
+                    <div className={`p-3 rounded-lg ${
+                      selectedVoice 
+                        ? 'bg-libran-accent/10 border border-libran-accent/30' 
+                        : 'bg-libran-gold/10 border border-libran-gold/30'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-white">
+                            {selectedVoice ? selectedVoice.name : selectedVoiceFilter?.name}
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            {selectedVoice ? selectedVoice.description : selectedVoiceFilter?.prompt}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedVoice(null)
+                            setSelectedVoiceFilter(null)
+                          }}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* Voice Filter */}
-                {showVoiceFilter && (
+                {/* Integrated Voice Selector */}
+                {showVoiceSelector && (
                   <div className="mb-4">
-                    <DynamicVoiceFilter
+                    <IntegratedVoiceSelector
+                      onVoiceSelect={handleVoiceSelect}
                       onVoiceFilterSelect={handleVoiceFilterSelect}
-                      selectedFilter={selectedVoiceFilter || undefined}
+                      selectedVoice={selectedVoice}
+                      selectedVoiceFilter={selectedVoiceFilter}
                     />
                   </div>
                 )}

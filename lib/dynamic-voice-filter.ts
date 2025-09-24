@@ -126,6 +126,9 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
   const words = prompt.toLowerCase().split(/\s+/);
   const characteristics = { ...DEFAULT_VOICE_CHARACTERISTICS };
   
+  console.log('Parsing voice prompt:', prompt);
+  console.log('Words found:', words);
+  
   // Process each keyword category
   Object.entries(VOICE_KEYWORDS).forEach(([category, keywords]) => {
     const matchingWords = words.filter(word => word in keywords);
@@ -134,6 +137,7 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
       // Average the values of matching keywords
       const avgValue = matchingWords.reduce((sum, word) => sum + (keywords as Record<string, number>)[word], 0) / matchingWords.length;
       characteristics[category as keyof VoiceCharacteristics] = avgValue;
+      console.log(`Category ${category}: matched words [${matchingWords.join(', ')}] -> value ${avgValue}`);
     }
   });
   
@@ -156,6 +160,7 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
     });
   }
   
+  console.log('Generated characteristics:', characteristics);
   return characteristics;
 }
 
@@ -163,25 +168,76 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
 export function characteristicsToTTSParams(characteristics: VoiceCharacteristics) {
   return {
     // OpenAI TTS parameters
-    speed: characteristics.speed,
+    speed: Math.max(0.5, Math.min(2.0, characteristics.speed || 1.0)),
     
     // Custom voice styling (to be applied in post-processing or via prompt engineering)
     voiceStyle: {
-      pitch: characteristics.pitch,
-      volume: characteristics.volume,
-      emphasis: characteristics.emphasis,
-      warmth: characteristics.warmth,
-      authority: characteristics.authority,
-      mystery: characteristics.mystery,
-      energy: characteristics.energy,
-      formality: characteristics.formality,
-      ancientness: characteristics.ancientness,
-      solemnity: characteristics.solemnity,
-      pauseLength: characteristics.pauseLength,
-      breathiness: characteristics.breathiness,
-      clarity: characteristics.clarity
+      pitch: Math.max(0.5, Math.min(2.0, characteristics.pitch || 1.0)),
+      volume: Math.max(0.1, Math.min(1.0, characteristics.volume || 0.8)),
+      emphasis: Math.max(0.1, Math.min(1.0, characteristics.emphasis || 0.5)),
+      warmth: Math.max(0.0, Math.min(1.0, characteristics.warmth || 0.5)),
+      authority: Math.max(0.0, Math.min(1.0, characteristics.authority || 0.5)),
+      mystery: Math.max(0.0, Math.min(1.0, characteristics.mystery || 0.5)),
+      energy: Math.max(0.0, Math.min(1.0, characteristics.energy || 0.5)),
+      formality: Math.max(0.0, Math.min(1.0, characteristics.formality || 0.5)),
+      ancientness: Math.max(0.0, Math.min(1.0, characteristics.ancientness || 0.5)),
+      solemnity: Math.max(0.0, Math.min(1.0, characteristics.solemnity || 0.5)),
+      pauseLength: Math.max(0.5, Math.min(2.0, characteristics.pauseLength || 1.0)),
+      breathiness: Math.max(0.0, Math.min(1.0, characteristics.breathiness || 0.3)),
+      clarity: Math.max(0.0, Math.min(1.0, characteristics.clarity || 0.8))
     }
   };
+}
+
+// Validate and sanitize voice filter data
+export function validateVoiceFilter(filter: any): VoiceFilter | null {
+  if (!filter || typeof filter !== 'object') return null;
+  
+  // Check if we have characteristics (required)
+  if (!filter.characteristics || typeof filter.characteristics !== 'object') {
+    return null;
+  }
+  
+  // Create a valid VoiceCharacteristics object with defaults
+  const characteristics = filter.characteristics;
+  const validCharacteristics: VoiceCharacteristics = {
+    pitch: Math.max(0.5, Math.min(2.0, characteristics.pitch || 1.0)),
+    speed: Math.max(0.5, Math.min(2.0, characteristics.speed || 1.0)),
+    volume: Math.max(0.1, Math.min(1.0, characteristics.volume || 0.8)),
+    emphasis: Math.max(0.1, Math.min(1.0, characteristics.emphasis || 0.5)),
+    warmth: Math.max(0.0, Math.min(1.0, characteristics.warmth || 0.5)),
+    authority: Math.max(0.0, Math.min(1.0, characteristics.authority || 0.5)),
+    mystery: Math.max(0.0, Math.min(1.0, characteristics.mystery || 0.5)),
+    energy: Math.max(0.0, Math.min(1.0, characteristics.energy || 0.5)),
+    formality: Math.max(0.0, Math.min(1.0, characteristics.formality || 0.5)),
+    ancientness: Math.max(0.0, Math.min(1.0, characteristics.ancientness || 0.5)),
+    solemnity: Math.max(0.0, Math.min(1.0, characteristics.solemnity || 0.5)),
+    pauseLength: Math.max(0.5, Math.min(2.0, characteristics.pauseLength || 1.0)),
+    breathiness: Math.max(0.0, Math.min(1.0, characteristics.breathiness || 0.3)),
+    clarity: Math.max(0.0, Math.min(1.0, characteristics.clarity || 0.8))
+  };
+  
+  // Create a minimal VoiceFilter object
+  return {
+    id: filter.id || `temp_${Date.now()}`,
+    name: filter.name || 'Custom Voice',
+    prompt: filter.prompt || 'Custom voice filter',
+    characteristics: validCharacteristics,
+    createdAt: filter.createdAt ? new Date(filter.createdAt) : new Date(),
+    lastUsed: filter.lastUsed ? new Date(filter.lastUsed) : undefined,
+    useCount: Math.max(0, Number(filter.useCount) || 0)
+  };
+}
+
+// Create a voice filter from JSON data
+export function createVoiceFilterFromJSON(jsonData: any): VoiceFilter | null {
+  try {
+    const filter = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+    return validateVoiceFilter(filter);
+  } catch (error) {
+    console.error('Failed to parse voice filter JSON:', error);
+    return null;
+  }
 }
 
 // Generate a voice filter from a prompt

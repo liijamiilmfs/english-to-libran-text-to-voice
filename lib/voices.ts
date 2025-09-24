@@ -28,6 +28,7 @@ export interface VoiceProfile {
   pitch: 'low' | 'medium' | 'high';
   energy: 'low' | 'medium' | 'high';
   formality: 'casual' | 'formal' | 'ceremonial';
+  gender: 'male' | 'female' | 'neutral';
   libránSuitability: number; // 1-10 scale for how well it fits Librán accent
 }
 
@@ -42,6 +43,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     pitch: 'low',
     energy: 'medium',
     formality: 'formal',
+    gender: 'neutral',
     libránSuitability: 9
   },
   echo: {
@@ -54,6 +56,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     pitch: 'low',
     energy: 'high',
     formality: 'ceremonial',
+    gender: 'male',
     libránSuitability: 8
   },
   fable: {
@@ -66,6 +69,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     pitch: 'medium',
     energy: 'medium',
     formality: 'casual',
+    gender: 'female',
     libránSuitability: 7
   },
   onyx: {
@@ -78,6 +82,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     pitch: 'low',
     energy: 'high',
     formality: 'formal',
+    gender: 'male',
     libránSuitability: 9
   },
   nova: {
@@ -90,6 +95,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     pitch: 'high',
     energy: 'high',
     formality: 'formal',
+    gender: 'female',
     libránSuitability: 6
   },
   shimmer: {
@@ -102,6 +108,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     pitch: 'high',
     energy: 'low',
     formality: 'ceremonial',
+    gender: 'female',
     libránSuitability: 8
   }
 };
@@ -114,6 +121,75 @@ export const VOICE_LABELS: Record<Voice, string> = {
   nova: "Nova - Bright, energetic",
   shimmer: "Shimmer - Soft, ethereal"
 };
+
+// Select the best voice based on characteristics
+export function selectVoiceForCharacteristics(characteristics: any): Voice {
+  console.log('=== VOICE SELECTION DEBUG ===');
+  console.log('Input characteristics:', characteristics);
+  
+  const words = characteristics.prompt?.toLowerCase().split(/\s+/) || [];
+  console.log('Words from prompt:', words);
+  
+  // Check for gender preferences first
+  const wantsMale = words.some((word: string) => ['male', 'man', 'masculine', 'deep', 'low', 'bass', 'baritone'].includes(word));
+  const wantsFemale = words.some((word: string) => ['female', 'woman', 'feminine', 'high', 'soprano', 'soft', 'gentle'].includes(word));
+  
+  console.log('Gender preferences:', { wantsMale, wantsFemale });
+  
+  // Filter voices by gender preference
+  let candidateVoices = Object.values(VOICE_PROFILES);
+  
+  if (wantsMale) {
+    candidateVoices = candidateVoices.filter(v => v.gender === 'male');
+    console.log('Filtered to male voices:', candidateVoices.map(v => v.name));
+  } else if (wantsFemale) {
+    candidateVoices = candidateVoices.filter(v => v.gender === 'female');
+    console.log('Filtered to female voices:', candidateVoices.map(v => v.name));
+  }
+  
+  // If no gender preference or no matches, use all voices
+  if (candidateVoices.length === 0) {
+    candidateVoices = Object.values(VOICE_PROFILES);
+    console.log('Using all voices (no gender preference)');
+  }
+  
+  // Score voices based on characteristics
+  let bestVoice = candidateVoices[0];
+  let bestScore = 0;
+  
+  console.log('Scoring voices:');
+  for (const voice of candidateVoices) {
+    let score = 0;
+    
+    // Pitch matching
+    if (characteristics.pitch < 0.7 && voice.pitch === 'low') score += 3;
+    else if (characteristics.pitch > 1.3 && voice.pitch === 'high') score += 3;
+    else if (characteristics.pitch >= 0.7 && characteristics.pitch <= 1.3 && voice.pitch === 'medium') score += 2;
+    
+    // Energy matching
+    if (characteristics.energy < 0.3 && voice.energy === 'low') score += 3;
+    else if (characteristics.energy > 0.7 && voice.energy === 'high') score += 3;
+    else if (characteristics.energy >= 0.3 && characteristics.energy <= 0.7 && voice.energy === 'medium') score += 2;
+    
+    // Formality matching
+    if (characteristics.formality > 0.7 && voice.formality === 'ceremonial') score += 3;
+    else if (characteristics.formality > 0.5 && voice.formality === 'formal') score += 2;
+    else if (characteristics.formality < 0.3 && voice.formality === 'casual') score += 2;
+    
+    // Librán suitability bonus
+    score += voice.libránSuitability * 0.5;
+    
+    console.log(`  ${voice.name} (${voice.gender}): score ${score} (pitch: ${voice.pitch}, energy: ${voice.energy}, formality: ${voice.formality})`);
+    
+    if (score > bestScore) {
+      bestScore = score;
+      bestVoice = voice;
+    }
+  }
+  
+  console.log(`=== SELECTED: ${bestVoice.name} (${bestVoice.gender}) with score ${bestScore} ===`);
+  return bestVoice.id;
+}
 
 // Filter options for dynamic voice selection
 export interface VoiceFilter {

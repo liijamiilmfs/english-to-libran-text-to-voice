@@ -5,8 +5,9 @@ import { log, generateCorrelationId, LogEvents } from '@/lib/logger'
 import { ttsCache } from '@/lib/tts-cache'
 import { withGuardrails } from '@/lib/api-guardrails'
 import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
-import { VOICE_PROFILES, Voice } from '@/lib/voices'
-import type { VoiceCharacteristics } from '@/lib/dynamic-voice-filter'
+import { VOICE_PROFILES, Voice, selectVoiceForCharacteristics } from '@/lib/voices'
+import { validateVoiceFilter, characteristicsToTTSParams } from '@/lib/dynamic-voice-filter'
+
 
 async function handleSpeakRequest(request: NextRequest) {
   const startTime = Date.now()
@@ -24,7 +25,22 @@ async function handleSpeakRequest(request: NextRequest) {
     libranText = requestBody.libranText || ''
     voice = requestBody.voice || (process.env.OPENAI_TTS_VOICE ?? 'alloy')
     const format = requestBody.format || (process.env.AUDIO_FORMAT ?? 'mp3')
-    const voiceFilter = requestBody.voiceFilter as { characteristics: VoiceCharacteristics; prompt: string } | undefined
+    // Validate and sanitize voice filter if provided
+    const rawVoiceFilter = requestBody.voiceFilter;
+    const voiceFilter = rawVoiceFilter ? validateVoiceFilter(rawVoiceFilter) : null;
+    
+    // Debug logging
+    if (rawVoiceFilter) {
+      log.info('Voice filter received', {
+        corr_id: requestId,
+        ctx: {
+          hasRawFilter: !!rawVoiceFilter,
+          hasValidatedFilter: !!voiceFilter,
+          rawFilterKeys: Object.keys(rawVoiceFilter),
+          characteristicsKeys: rawVoiceFilter.characteristics ? Object.keys(rawVoiceFilter.characteristics) : 'none'
+        }
+      });
+    }
 
     if (!libranText || typeof libranText !== 'string') {
       const errorResponse = createErrorResponse(ErrorCode.VALIDATION_MISSING_TEXT, { requestId })
@@ -33,11 +49,25 @@ async function handleSpeakRequest(request: NextRequest) {
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
 
+    // Select voice based on characteristics if voice filter is provided
+    let selectedVoice = voice as Voice;
+    if (voiceFilter) {
+      selectedVoice = selectVoiceForCharacteristics(voiceFilter);
+      log.info('Voice selected based on characteristics', {
+        corr_id: requestId,
+        ctx: {
+          originalVoice: voice,
+          selectedVoice: selectedVoice,
+          voiceFilterPrompt: voiceFilter.prompt
+        }
+      });
+    }
+
     // Validate voice parameter using the enhanced voice system
     const validVoices = Object.keys(VOICE_PROFILES) as Voice[]
-    if (!validVoices.includes(voice as Voice)) {
-      const errorResponse = createErrorResponse(ErrorCode.VALIDATION_INVALID_VOICE, { requestId, voice })
-      log.validationFail('voice', 'Invalid voice parameter', requestId, { voice })
+    if (!validVoices.includes(selectedVoice)) {
+      const errorResponse = createErrorResponse(ErrorCode.VALIDATION_INVALID_VOICE, { requestId, voice: selectedVoice })
+      log.validationFail('voice', 'Invalid voice parameter', requestId, { voice: selectedVoice })
       metrics.recordError('validation_error', 'Invalid voice parameter')
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
@@ -54,7 +84,7 @@ async function handleSpeakRequest(request: NextRequest) {
     characterCount = libranText.length
     
     // Log voice selection with enhanced metadata
-    const voiceProfile = VOICE_PROFILES[voice as Voice]
+    const voiceProfile = VOICE_PROFILES[selectedVoice]
     log.info('Starting TTS generation', {
       event: LogEvents.TTS_START,
       corr_id: requestId,
@@ -95,16 +125,26 @@ async function handleSpeakRequest(request: NextRequest) {
       });
       
       // Apply voice filter characteristics if provided
-      const speed = voiceFilter 
-        ? voiceFilter.characteristics.speed 
-        : voiceProfile.energy === 'low' ? 0.7 : voiceProfile.energy === 'high' ? 1.2 : 1.0
+      const ttsParams = voiceFilter 
+        ? characteristicsToTTSParams(voiceFilter.characteristics)
+        : { speed: voiceProfile.energy === 'low' ? 0.7 : voiceProfile.energy === 'high' ? 1.2 : 1.0 }
+      
+      // Debug TTS parameters
+      log.info('TTS parameters generated', {
+        corr_id: requestId,
+        ctx: {
+          hasVoiceFilter: !!voiceFilter,
+          ttsSpeed: ttsParams.speed,
+          voiceProfileSpeed: voiceProfile.energy === 'low' ? 0.7 : voiceProfile.energy === 'high' ? 1.2 : 1.0
+        }
+      });
 
       const response = await client.audio.speech.create({
         model: model,
-        voice: voice as any,
+        voice: selectedVoice as any,
         input: libranText,
         response_format: format as any,
-        speed: speed
+        speed: ttsParams.speed
       });
 
       audioBuffer = Buffer.from(await response.arrayBuffer())
