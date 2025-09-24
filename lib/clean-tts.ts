@@ -51,8 +51,17 @@ function assertEnvironmentVariable(name: string, value: string | undefined): ass
 }
 
 function sanitizeTextForElevenLabs(text: string): string {
+  // First, let's log the original text to see what we're dealing with
+  console.log('=== SANITIZATION DEBUG ===');
+  console.log('Original text length:', text.length);
+  console.log('Original text preview:', text.slice(0, 100));
+  
+  // Find all non-ASCII characters
+  const nonAsciiChars = text.split('').map((c, i) => ({ char: c, code: c.charCodeAt(0), index: i })).filter(c => c.code > 127);
+  console.log('Non-ASCII characters found:', nonAsciiChars.slice(0, 10));
+  
   // Replace problematic Unicode characters that ElevenLabs can't handle
-  return text
+  let sanitized = text
     .replace(/–/g, '-') // Replace em dash (8211) with regular dash
     .replace(/—/g, '-') // Replace en dash (8212) with regular dash
     .replace(/"/g, '"') // Replace smart quotes with regular quotes
@@ -60,10 +69,17 @@ function sanitizeTextForElevenLabs(text: string): string {
     .replace(/'/g, "'") // Replace smart apostrophes with regular apostrophes
     .replace(/'/g, "'")
     .replace(/…/g, '...') // Replace ellipsis with three dots
-    .replace(/[^\x00-\x7F]/g, '?') // Replace any remaining non-ASCII characters with ?
     .replace(/[\u2010-\u2015]/g, '-') // Replace various dash characters
     .replace(/[\u2018-\u2019]/g, "'") // Replace various apostrophe characters
     .replace(/[\u201C-\u201D]/g, '"') // Replace various quote characters
+    .replace(/[^\x00-\x7F]/g, '?') // Replace any remaining non-ASCII characters with ?
+  
+  console.log('Sanitized text length:', sanitized.length);
+  console.log('Sanitized text preview:', sanitized.slice(0, 100));
+  console.log('Was text changed?', sanitized !== text);
+  console.log('=== END SANITIZATION DEBUG ===');
+  
+  return sanitized;
 }
 
 async function callElevenLabs(
