@@ -38,6 +38,7 @@
     "ml:tokenizer": "node tools/ml/tokenizer/libran_tokenizer.js",
     "ml:corpus": "node tools/ml/training/data_preparation.js",
     "ml:evaluate": "node tools/ml/training/model_evaluation.js",
+    "ml:example": "node examples/ml-example.js",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
     "release:major": "standard-version --release-as major",
