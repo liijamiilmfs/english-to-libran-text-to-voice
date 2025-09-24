@@ -18,12 +18,7 @@ export type VoiceUseCase =
   | 'storytelling' | 'ceremonial' | 'narration' | 'dialogue' | 'announcement'
   | 'whisper' | 'declaration' | 'invocation' | 'warning' | 'general';
 
-export type VoiceAccent = 
-  | 'libran' | 'american' | 'british' | 'australian' | 'canadian' | 'irish' | 'scottish' 
-  | 'welsh' | 'south-african' | 'new-zealand' | 'neutral'
-  | 'russian' | 'ukrainian' | 'polish' | 'czech' | 'hungarian' | 'romanian'
-  | 'bulgarian' | 'serbian' | 'croatian' | 'slovak' | 'kazakh' | 'uzbek'
-  | 'mongolian' | 'turkish' | 'persian' | 'armenian' | 'georgian';
+export type VoiceAccent = 'libran';
 
 export interface VoiceProfile {
   id: Voice;
@@ -80,7 +75,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     energy: 'medium',
     formality: 'casual',
     gender: 'female',
-    accent: 'american',
+    accent: 'libran',
     libránSuitability: 7
   },
   onyx: {
@@ -94,7 +89,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     energy: 'high',
     formality: 'formal',
     gender: 'male',
-    accent: 'ukrainian',
+    accent: 'libran',
     libránSuitability: 9
   },
   nova: {
@@ -108,7 +103,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     energy: 'high',
     formality: 'formal',
     gender: 'female',
-    accent: 'kazakh',
+    accent: 'libran',
     libránSuitability: 6
   },
   shimmer: {
@@ -122,7 +117,7 @@ export const VOICE_PROFILES: Record<Voice, VoiceProfile> = {
     energy: 'low',
     formality: 'ceremonial',
     gender: 'female',
-    accent: 'mongolian',
+    accent: 'libran',
     libránSuitability: 8
   }
 };
@@ -162,16 +157,11 @@ export function selectVoiceForCharacteristics(characteristics: any, accentOverri
     console.log('Filtered to female voices:', candidateVoices.map(v => v.name));
   }
   
-  // Filter by accent if provided
-  if (accentOverride) {
-    if (accentOverride === 'libran') {
-      // For Librán accent, prioritize voices with high Librán suitability
-      candidateVoices = candidateVoices.filter(v => v.libránSuitability >= 7);
-      console.log(`Filtered to Librán-suitable voices:`, candidateVoices.map(v => v.name));
-    } else {
-      candidateVoices = candidateVoices.filter(v => v.accent === accentOverride);
-      console.log(`Filtered to ${accentOverride} accent voices:`, candidateVoices.map(v => v.name));
-    }
+  // Filter by Librán accent if provided
+  if (accentOverride === 'libran') {
+    // For Librán accent, prioritize voices with high Librán suitability
+    candidateVoices = candidateVoices.filter(v => v.libránSuitability >= 7);
+    console.log(`Filtered to Librán-suitable voices:`, candidateVoices.map(v => v.name));
   }
   
   // If no gender preference or no matches, use all voices
@@ -209,13 +199,9 @@ export function selectVoiceForCharacteristics(characteristics: any, accentOverri
     else if (characteristics.formality > 0.5 && voice.formality === 'formal') score += 2;
     else if (characteristics.formality < 0.3 && voice.formality === 'casual') score += 2;
     
-      // Accent matching bonus
-      if (accentOverride) {
-        if (accentOverride === 'libran' && voice.libránSuitability >= 7) {
-          score += 5; // Strong bonus for Librán suitability
-        } else if (voice.accent === accentOverride) {
-          score += 5; // Strong bonus for exact accent match
-        }
+      // Librán accent bonus
+      if (accentOverride === 'libran' && voice.libránSuitability >= 7) {
+        score += 5; // Strong bonus for Librán suitability
       }
     
     // Librán suitability bonus
