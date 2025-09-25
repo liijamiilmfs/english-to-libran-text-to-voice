@@ -3,21 +3,21 @@
  */
 
 // Set test environment before any imports
-Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true })
+process.env.NODE_ENV = 'test'
 
-import { describe, it, before, after } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, it, beforeAll, afterAll } from 'vitest'
+import { assert } from 'vitest'
 import { NextRequest } from 'next/server'
 import { createRateLimiter } from '../../lib/rate-limiter'
 import { createBudgetGuardrails } from '../../lib/budget-guardrails'
 import { withGuardrails, resetGuardrails } from '../../lib/api-guardrails'
 
 describe('Guardrails API Integration', () => {
-  before(() => {
+  beforeAll(() => {
     resetGuardrails()
   })
 
-  after(() => {
+  afterAll(() => {
     resetGuardrails()
   })
 
@@ -66,8 +66,8 @@ describe('Guardrails API Integration', () => {
         body: JSON.stringify({ text: 'test' })
       })
 
-      // Make requests up to the burst limit (10 by default)
-      for (let i = 0; i < 10; i++) {
+      // Make requests up to the burst limit (1000 in test mode)
+      for (let i = 0; i < 1000; i++) {
         const response = await guardedHandler(request)
         assert.equal(response.status, 200)
       }
@@ -83,6 +83,12 @@ describe('Guardrails API Integration', () => {
   })
 
   describe('Budget Guardrails', () => {
+    beforeEach(async () => {
+      // Reset budget state before each test
+      const { budgetGuardrails } = await import('../../lib/budget-guardrails')
+      budgetGuardrails.reset()
+    })
+
     it('should allow requests within budget', async () => {
       const mockHandler = async (request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
@@ -121,8 +127,8 @@ describe('Guardrails API Integration', () => {
         requireUserId: false
       })
 
-      // Create a request with text exceeding the per-request limit (10k chars)
-      const largeText = 'a'.repeat(15000)
+      // Create a request with text exceeding the per-request limit (100k chars in test mode)
+      const largeText = 'a'.repeat(150000)
       const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,8 +157,8 @@ describe('Guardrails API Integration', () => {
         requireUserId: false
       })
 
-      // Create requests that will exceed daily limit (100k chars)
-      const largeText = 'a'.repeat(50000)
+      // Create requests that will exceed daily limit (10M chars in test mode)
+      const largeText = 'a'.repeat(5000000)
       
       // First request should succeed
       const request1 = new NextRequest('http://localhost:3000/api/test', {
