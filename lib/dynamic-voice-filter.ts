@@ -126,9 +126,6 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
   const words = prompt.toLowerCase().split(/\s+/);
   const characteristics = { ...DEFAULT_VOICE_CHARACTERISTICS };
   
-  console.log('Parsing voice prompt:', prompt);
-  console.log('Words found:', words);
-  
   // Process each keyword category
   Object.entries(VOICE_KEYWORDS).forEach(([category, keywords]) => {
     const matchingWords = words.filter(word => word in keywords);
@@ -137,7 +134,7 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
       // Average the values of matching keywords
       const avgValue = matchingWords.reduce((sum, word) => sum + (keywords as Record<string, number>)[word], 0) / matchingWords.length;
       characteristics[category as keyof VoiceCharacteristics] = avgValue;
-      console.log(`Category ${category}: matched words [${matchingWords.join(', ')}] -> value ${avgValue}`);
+      // Debug logging removed for production build
     }
   });
   
@@ -160,7 +157,6 @@ export function parseVoicePrompt(prompt: string): VoiceCharacteristics {
     });
   }
   
-  console.log('Generated characteristics:', characteristics);
   return characteristics;
 }
 
