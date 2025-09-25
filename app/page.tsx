@@ -8,7 +8,7 @@ import TranslationForm from './components/TranslationForm'
 import TranslationResult from './components/TranslationResult'
 import AudioDownloadButton from './components/AudioDownloadButton'
 import PhrasePicker from './components/PhrasePicker'
-import IntegratedVoiceSelector from './components/IntegratedVoiceSelector'
+// import IntegratedVoiceSelector from './components/IntegratedVoiceSelector'
 import {
   SIMPLE_VOICE_OPTIONS,
   getSimpleVoiceDefinition,
@@ -379,17 +379,18 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Integrated Voice Selector */}
+                {/* Integrated Voice Selector - TEMPORARILY DISABLED FOR DEBUG */}
                 {showVoiceSelector && (
                   <div className="mb-4">
-                    <IntegratedVoiceSelector
+                    <div className="text-white">Voice selector temporarily disabled for debugging</div>
+                    {/* <IntegratedVoiceSelector
                       onVoiceSelect={handleVoiceSelect}
                       onVoiceFilterSelect={handleVoiceFilterSelect}
                       onAccentChange={handleAccentChange}
                       selectedVoice={selectedVoice}
                       selectedVoiceFilter={selectedVoiceFilter}
                       selectedAccent={selectedAccent}
-                    />
+                    /> */}
                   </div>
                 )}
 
