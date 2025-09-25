@@ -119,8 +119,23 @@ class TTSCache {
     }
   }
 
-  public generateHash(libranText: string, voice: string, format: string, model: string): string {
-    const content = `${libranText}|${voice}|${format}|${model}`;
+  public generateHash(libranText: string, voice: string, format: string, model: string, additionalParams?: Record<string, any>): string {
+    let content = `${libranText}|${voice}|${format}|${model}`;
+    
+    // Include additional parameters (like voice filter characteristics) in cache key
+    if (additionalParams) {
+      // Sort keys for consistent hashing regardless of parameter order
+      const sortedKeys = Object.keys(additionalParams).sort();
+      for (const key of sortedKeys) {
+        const value = additionalParams[key];
+        if (value !== null && value !== undefined) {
+          // Handle objects by stringifying them
+          const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+          content += `|${key}:${valueStr}`;
+        }
+      }
+    }
+    
     return crypto.createHash('sha256').update(content).digest('hex');
   }
 

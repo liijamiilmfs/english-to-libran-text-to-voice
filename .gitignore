@@ -96,6 +96,7 @@ temp/
 # Editor directories and files
 .vscode/
 .idea/
+.cursorrules
 *.swp
 *.swo
 *~
@@ -188,3 +189,5 @@ audit-reports/
 .DS_Store
 Thumbs.db
 
+# GPT Runner scripts (external project)
+scripts/gpt_runner_*.ps1
