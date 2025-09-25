@@ -179,3 +179,12 @@ qa-report-*.csv
 
 # GPT Runner milestone scripts (generated files)
 scripts/gpt_runner_milestones*.ps1
+
+# Cleanup additions
+audit-reports/
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
