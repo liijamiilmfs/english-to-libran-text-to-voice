@@ -112,7 +112,22 @@ async function callElevenLabs(
   })
 
   const modelId = process.env.ELEVENLABS_MODEL_ID ?? DEFAULT_ELEVEN_MODEL
-  const outputFormat = process.env.ELEVENLABS_OUTPUT_FORMAT ?? DEFAULT_ELEVEN_OUTPUT_FORMAT
+  
+  // Map client format to ElevenLabs output format
+  const formatMapping: Record<NonNullable<CleanTTSOptions['format']>, string> = {
+    'mp3': 'mp3_44100_128',
+    'wav': 'pcm_16000',
+    'flac': 'flac_44100_128'
+  }
+  const outputFormat = format ? formatMapping[format] : DEFAULT_ELEVEN_OUTPUT_FORMAT
+
+  // Map format to proper MIME type for Accept header
+  const mimeTypeMapping: Record<NonNullable<CleanTTSOptions['format']>, string> = {
+    'mp3': 'audio/mpeg',
+    'wav': 'audio/wav',
+    'flac': 'audio/flac'
+  }
+  const acceptMimeType = format ? mimeTypeMapping[format] : 'audio/mpeg'
 
   const url = `${ELEVENLABS_BASE_URL}/${voice.elevenLabsVoiceId}`
 
@@ -124,7 +139,9 @@ async function callElevenLabs(
       voice: voice.id,
       voice_label: voice.label,
       model: modelId,
-      format: outputFormat,
+      requested_format: format,
+      elevenlabs_format: outputFormat,
+      mime_type: acceptMimeType,
       text_length: text.length
     }
   })
@@ -134,7 +151,7 @@ async function callElevenLabs(
     headers: {
       'Content-Type': 'application/json',
       'xi-api-key': process.env.ELEVENLABS_API_KEY,
-      Accept: format === 'wav' ? 'audio/wav' : 'audio/mpeg'
+      Accept: acceptMimeType
     },
     body: JSON.stringify({
       text: sanitizedText,
