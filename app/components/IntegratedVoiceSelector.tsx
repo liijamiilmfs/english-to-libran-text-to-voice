@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Play, Save, Trash2, Volume2, Star, Plus, Settings, Wand2 } from 'lucide-react'
+import { Play, Save, Trash2, Volume2, Star, Plus, Settings, Wand2, Shuffle } from 'lucide-react'
 import { VoiceProfile, VOICE_PROFILES, VoiceAccent } from '@/lib/voices'
 import { 
   VoiceFilter, 
@@ -13,7 +13,10 @@ import {
   describeVoiceCharacteristics,
   characteristicsToTTSParams
 } from '@/lib/dynamic-voice-filter'
+import { loadVoiceSettings, updateLastUsedVoice, addABTestResult } from '@/lib/voice-settings'
 import AccentSelector from './AccentSelector'
+import VoicePreview from './VoicePreview'
+import VoiceABTest from './VoiceABTest'
 
 interface IntegratedVoiceSelectorProps {
   onVoiceSelect: (voice: VoiceProfile | null) => void
@@ -34,7 +37,7 @@ export default function IntegratedVoiceSelector({
   selectedAccent,
   className = ''
 }: IntegratedVoiceSelectorProps) {
-  const [activeTab, setActiveTab] = useState<'preset' | 'custom'>('preset')
+  const [activeTab, setActiveTab] = useState<'preset' | 'custom' | 'preview' | 'abtest'>('preset')
   const [prompt, setPrompt] = useState('')
   const [filterName, setFilterName] = useState('')
   const [savedFilters, setSavedFilters] = useState<VoiceFilter[]>([])
@@ -54,6 +57,7 @@ export default function IntegratedVoiceSelector({
   const handlePresetVoiceSelect = (voice: VoiceProfile) => {
     onVoiceSelect(voice)
     onVoiceFilterSelect(null) // Clear any selected filter
+    updateLastUsedVoice(voice, null, selectedAccent, null)
   }
 
   const handleCreateFilter = () => {
@@ -76,6 +80,7 @@ export default function IntegratedVoiceSelector({
     updateFilterUsage(filter.id)
     onVoiceFilterSelect(filter)
     onVoiceSelect(null) // Clear any selected preset voice
+    updateLastUsedVoice(null, filter, selectedAccent, null)
     setSavedFilters(getSavedVoiceFilters())
   }
 
@@ -84,6 +89,20 @@ export default function IntegratedVoiceSelector({
     setSavedFilters(getSavedVoiceFilters())
     if (selectedVoiceFilter?.id === filterId) {
       onVoiceFilterSelect(null)
+    }
+  }
+
+  const handleABTestSelect = (voice: VoiceProfile | VoiceFilter) => {
+    if ('id' in voice && 'description' in voice) {
+      // It's a VoiceProfile
+      onVoiceSelect(voice as VoiceProfile)
+      onVoiceFilterSelect(null)
+      updateLastUsedVoice(voice as VoiceProfile, null, selectedAccent, null)
+    } else {
+      // It's a VoiceFilter
+      onVoiceFilterSelect(voice as VoiceFilter)
+      onVoiceSelect(null)
+      updateLastUsedVoice(null, voice as VoiceFilter, selectedAccent, null)
     }
   }
 
@@ -135,23 +154,43 @@ export default function IntegratedVoiceSelector({
       <div className="flex space-x-1 bg-libran-dark/50 p-1 rounded-lg">
         <button
           onClick={() => setActiveTab('preset')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'preset'
               ? 'bg-libran-gold text-libran-dark'
               : 'text-gray-300 hover:text-white'
           }`}
         >
-          Preset Voices
+          Preset
         </button>
         <button
           onClick={() => setActiveTab('custom')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'custom'
               ? 'bg-libran-gold text-libran-dark'
               : 'text-gray-300 hover:text-white'
           }`}
         >
-          Custom Voice
+          Custom
+        </button>
+        <button
+          onClick={() => setActiveTab('preview')}
+          className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'preview'
+              ? 'bg-libran-gold text-libran-dark'
+              : 'text-gray-300 hover:text-white'
+          }`}
+        >
+          <Volume2 className="w-4 h-4 mx-auto" />
+        </button>
+        <button
+          onClick={() => setActiveTab('abtest')}
+          className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'abtest'
+              ? 'bg-libran-gold text-libran-dark'
+              : 'text-gray-300 hover:text-white'
+          }`}
+        >
+          <Shuffle className="w-4 h-4 mx-auto" />
         </button>
       </div>
 
@@ -335,6 +374,33 @@ export default function IntegratedVoiceSelector({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Voice Preview Tab */}
+      {activeTab === 'preview' && (
+        <div className="space-y-4">
+          <VoicePreview
+            voice={selectedVoice}
+            voiceFilter={selectedVoiceFilter}
+            accent={selectedAccent}
+            sampleText="Salaam dunya, kama ana huna al-yaum"
+          />
+        </div>
+      )}
+
+      {/* A/B Test Tab */}
+      {activeTab === 'abtest' && (
+        <div className="space-y-4">
+          <VoiceABTest
+            voices={[
+              ...Object.values(VOICE_PROFILES),
+              ...savedFilters
+            ]}
+            accent={selectedAccent}
+            sampleText="Salaam dunya, kama ana huna al-yaum"
+            onVoiceSelect={handleABTestSelect}
+          />
         </div>
       )}
 
