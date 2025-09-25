@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { log, generateCorrelationId } from '../logger';
+// import fs from 'fs';
+// import path from 'path';
+import { log } from '../logger';
 import { unknownTokenLogger } from '../unknown-token-logger';
 import { loadDictionary as loadDictionaryFromLoader, getDictionaryEntry } from './dictionary-loader';
 
@@ -19,19 +19,7 @@ export interface TranslateOptions {
   dictionary?: Dictionary;
 }
 
-// Load dictionary from file using the new dictionary loader
-async function loadDictionary(variant: Variant): Promise<Dictionary> {
-  log.debug('Loading dictionary', { variant });
-  
-  try {
-    const dictionary = await loadDictionaryFromLoader(variant);
-    log.info('Dictionary loaded successfully', { variant, entryCount: Object.keys(dictionary.entries).length });
-    return dictionary;
-  } catch (error) {
-    log.errorWithContext(error as Error, 'DICTIONARY_LOAD_ERROR', generateCorrelationId(), { variant });
-    throw error;
-  }
-}
+// Dictionary loading function removed (using dictionary loader directly)
 
 // Tokenize text while preserving punctuation
 function tokenize(text: string): Array<{ type: 'word' | 'punctuation' | 'whitespace', value: string, original: string }> {

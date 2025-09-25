@@ -5,13 +5,11 @@ import {
   BarChart3, 
   TrendingUp, 
   TrendingDown, 
-  Calendar, 
   Users, 
   BookOpen,
   Languages,
   Activity,
-  Star,
-  Clock
+  Star
 } from 'lucide-react'
 
 interface AnalyticsData {
@@ -240,7 +238,7 @@ export default function DictionaryAnalytics({ timeRange = '30d' }: DictionaryAna
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Trending Words</h3>
           <div className="space-y-3">
-            {analytics.trendingWords.map((word, index) => (
+            {analytics.trendingWords.map((word, _index) => (
               <div key={word.word} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Star className="h-4 w-4 text-yellow-500" />

@@ -33,19 +33,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
-      ],
-      "@/types": [
-        "src/types"
-      ],
-      "@/utils": [
-        "src/utils"
-      ],
-      "@/transports": [
-        "src/transports"
-      ],
-      "@/io": [
-        "src/io"
+        "./*"
       ]
     },
     "allowJs": true,
@@ -63,15 +51,22 @@
     ]
   },
   "include": [
-    "src/**/*",
-    "tests/**/*",
+    "app/**/*",
+    "lib/**/*",
+    "test/**/*",
     ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "dist-test",
+    "dist-workers",
     "coverage",
     "dashboard",
+    "src",
+    "tests",
+    "venv",
+    "tools",
     "**/*.test.ts",
     "**/*.spec.ts"
   ],

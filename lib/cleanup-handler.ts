@@ -2,7 +2,7 @@
  * Global cleanup handler for intervals and timers
  */
 
-import { log } from './logger'
+// import { log } from './logger'
 
 // Track all intervals and timers for cleanup
 const intervals = new Set<NodeJS.Timeout>()

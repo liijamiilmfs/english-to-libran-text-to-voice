@@ -106,7 +106,7 @@ function applyLibránSuffix(baseTranslation: string, suffix: string, dictionary:
 }
 
 async function getContextTranslation(
-  token: Token, 
+  _token: Token, 
   allTokens: Token[], 
   currentIndex: number, 
   dictionary: Dictionary

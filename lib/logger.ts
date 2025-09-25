@@ -186,36 +186,9 @@ const baseConfig = {
   env: process.env.NODE_ENV || 'development'
 }
 
-const prettyPrintOptions = {
-  colorize: true,
-  translateTime: 'SYS:standard',
-  singleLine: false,
-  messageKey: 'msg',
-  ignore: 'service,env,event,ctx,err,corr_id,duration_ms,status,route,user_id'
-} as const
+// Pretty print options removed (not currently used)
 
-function createPrettyStream(): PinoDestinationStream | null {
-  if (!pinoModule || !isDev || isTest) {
-    return null
-  }
-
-  // Skip pino transport in development to avoid worker path issues
-  // Use direct pino-pretty instead
-  try {
-    // eslint-disable-next-line global-require
-    const pretty = require('pino-pretty')
-    if (typeof pretty === 'function') {
-      return pretty(prettyPrintOptions)
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('pino-pretty could not be loaded. Continuing without pretty logging.', {
-      error: error instanceof Error ? error.message : String(error)
-    })
-  }
-
-  return null
-}
+// Pretty stream creation function removed (not currently used)
 
 // Create rotating file streams
 function getStdoutDestination(): PinoDestinationStream {

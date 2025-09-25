@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { Volume2 } from 'lucide-react'
-import { VoiceProfile, VoiceAccent } from '@/lib/voices'
-import type { VoiceFilter } from '@/lib/dynamic-voice-filter'
+import { VoiceProfile, VoiceAccent } from '../lib/voices'
+import type { VoiceFilter } from '../lib/dynamic-voice-filter'
 import TranslationForm from './components/TranslationForm'
 import TranslationResult from './components/TranslationResult'
 import AudioDownloadButton from './components/AudioDownloadButton'
@@ -14,8 +14,8 @@ import {
   getSimpleVoiceDefinition,
   SimpleVoiceId,
   getDefaultSimpleVoice
-} from '@/lib/simple-voice-system'
-import type { Phrase } from '@/lib/types/phrase'
+} from '../lib/simple-voice-system'
+import type { Phrase } from '../lib/types/phrase'
 
 export default function Home() {
   const [inputText, setInputText] = useState('')
@@ -106,29 +106,6 @@ export default function Home() {
     ? formatAccentLabel(simpleVoiceDefinition.accent)
     : formatAccentLabel(selectedAccent)
   const activeProvider = simpleVoiceDefinition ? 'ElevenLabs' : hasAdvancedVoice ? 'OpenAI' : null
-
-  const handleTranslationComplete = async (text: string, variant: 'ancient' | 'modern') => {
-    try {
-      const response = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, variant })
-      })
-
-      if (!response.ok) throw new Error('Translation failed')
-      
-      const data = await response.json()
-      setLibranText(data.libran)
-      setTranslationData({
-        confidence: data.confidence,
-        wordCount: data.wordCount
-      })
-    } catch (error) {
-      console.error('Translation error:', error)
-      alert('Translation failed. Please try again.')
-    }
-  }
-
 
   const handleSpeak = async () => {
     if (!libranText.trim()) {
@@ -273,6 +250,7 @@ export default function Home() {
                 originalText={inputText}
                 confidence={translationData.confidence}
                 wordCount={translationData.wordCount}
+                isTranslating={isTranslating}
               />
 
               {/* Audio Controls */}
@@ -397,14 +375,16 @@ export default function Home() {
                 {/* Speak Button */}
                 <button
                   onClick={handleSpeak}
-                  disabled={!libranText.trim() || isGenerating || (!selectedSimpleVoice && !selectedVoice && !selectedVoiceFilter)}                             
+                  disabled={!libranText.trim() || isGenerating || isTranslating || (!selectedSimpleVoice && !selectedVoice && !selectedVoiceFilter)}                             
                   className="btn-primary w-full mb-4"
                 >
                   {isGenerating
                     ? 'Generating...'
-                    : (!selectedSimpleVoice && !selectedVoice && !selectedVoiceFilter)                                                                          
-                      ? 'Select Voice First'
-                      : 'Speak'}
+                    : isTranslating
+                      ? 'Translating...'
+                      : (!selectedSimpleVoice && !selectedVoice && !selectedVoiceFilter)                                                                          
+                        ? 'Select Voice First'
+                        : 'Speak'}
                 </button>
 
                 {/* Audio Player */}

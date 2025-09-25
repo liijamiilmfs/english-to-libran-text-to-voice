@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Copy, Download, Upload, FileText } from 'lucide-react'
-import { createVoiceFilter, validateVoiceFilter, type VoiceFilter } from '@/lib/dynamic-voice-filter'
+import { createVoiceFilter, validateVoiceFilter } from '../../lib/dynamic-voice-filter'
 
 export default function VoiceFilterTemplate() {
   const [template, setTemplate] = useState('')

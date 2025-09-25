@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Save, Trash2, Tag, Folder, FileText, Download } from 'lucide-react'
+import { X, Save, Tag, Folder, FileText, Download } from 'lucide-react'
 
 interface BulkEditModalProps {
   isOpen: boolean

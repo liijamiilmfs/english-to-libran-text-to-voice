@@ -117,7 +117,7 @@ function setupFileWatcher(variant: 'ancient' | 'modern', dictionariesDir: string
   const filePath = path.join(dictionariesDir, `${variant}.json`)
   
   if (fs.existsSync(filePath)) {
-    const watcher = watch(filePath, (eventType, filename) => {
+    const watcher = watch(filePath, (eventType, _filename) => {
       if (eventType === 'change') {
         console.log(`[DictionaryLoader] Dictionary file changed: ${variant}.json`)
         invalidateCache(variant)

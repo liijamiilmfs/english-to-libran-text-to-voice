@@ -7,7 +7,7 @@ import { Worker } from 'node:worker_threads';
  * This ensures we always point to a stable filesystem path, not .next paths
  */
 export function resolveWorkerPath(workerName: string): string {
-  const isDev = process.env.NODE_ENV !== 'production';
+  // const isDev = process.env.NODE_ENV !== 'production'; // Not currently used
   
   // In both dev and prod, use the compiled worker from dist-workers
   const workerPath = path.join(process.cwd(), 'dist-workers', `${workerName}.js`);

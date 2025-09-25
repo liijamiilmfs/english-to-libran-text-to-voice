@@ -4,7 +4,7 @@
  */
 
 import { log } from './logger'
-import { trackInterval, clearTrackedInterval } from './cleanup-handler'
+import { trackInterval } from './cleanup-handler'
 
 export interface RateLimitConfig {
   maxRequestsPerMinute: number

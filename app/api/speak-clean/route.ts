@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withGuardrails } from '@/lib/api-guardrails'
-import { log, LogEvents, generateCorrelationId } from '@/lib/logger'
-import { metrics } from '@/lib/metrics'
-import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
-import { synthesizeCleanSpeech } from '@/lib/clean-tts'
+import { withGuardrails } from '../../../lib/api-guardrails'
+import { log, LogEvents, generateCorrelationId } from '../../../lib/logger'
+import { metrics } from '../../../lib/metrics'
+import { ErrorCode, createErrorResponse } from '../../../lib/error-taxonomy'
+import { synthesizeCleanSpeech } from '../../../lib/clean-tts'
 import {
   getSimpleVoiceDefinition,
   getDefaultSimpleVoice
-} from '@/lib/simple-voice-system'
+} from '../../../lib/simple-voice-system'
 
 type CleanTTSFormat = 'mp3' | 'wav' | 'flac'
 

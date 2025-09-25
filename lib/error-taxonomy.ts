@@ -362,7 +362,7 @@ export class ErrorTaxonomy {
   static createError(
     errorCode: ErrorCode,
     context?: ErrorContext,
-    originalError?: Error
+    _originalError?: Error
   ): ErrorDetails {
     const definition = ERROR_DEFINITIONS[errorCode]
     if (!definition) {

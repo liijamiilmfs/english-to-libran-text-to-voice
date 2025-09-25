@@ -108,7 +108,7 @@ export default function EtymologyTree({ entry }: EtymologyTreeProps) {
     setEtymology(mockEtymology)
   }, [entry.english, entry.ancient, entry.modern])
 
-  const loadEtymology = useCallback(async (etymologyData: string[]) => {
+  const loadEtymology = useCallback(async (_etymologyData: string[]) => {
     setLoading(true)
     try {
       // TODO: Implement actual etymology loading from database or API
@@ -195,22 +195,7 @@ export default function EtymologyTree({ entry }: EtymologyTreeProps) {
     )
   }
 
-  const getLanguageIcon = (language: string) => {
-    switch (language.toLowerCase()) {
-      case 'english':
-      case 'middle english':
-      case 'old english':
-        return <Globe className="h-4 w-4 text-blue-600" />
-      case 'latin':
-        return <BookOpen className="h-4 w-4 text-red-600" />
-      case 'ancient librán':
-      case 'modern librán':
-      case 'proto-librán':
-        return <BookOpen className="h-4 w-4 text-purple-600" />
-      default:
-        return <BookOpen className="h-4 w-4 text-gray-600" />
-    }
-  }
+  // Language icon helper function removed (not currently used)
 
   if (loading) {
     return (

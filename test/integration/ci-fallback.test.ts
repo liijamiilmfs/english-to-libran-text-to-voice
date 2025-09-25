@@ -3,8 +3,8 @@
  * These tests run when Python is not available in CI environment
  */
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
+import { describe, it } from 'vitest';
+import { assert } from 'vitest';
 
 describe('CI Fallback Tests', () => {
   it('should detect CI environment correctly', () => {
@@ -20,9 +20,9 @@ describe('CI Fallback Tests', () => {
     assert.ok(true);
   });
 
-  it('should be able to import core modules', () => {
+  it('should be able to import core modules', async () => {
     // Test that core functionality is available
-    const { translate } = require('../../lib/translator');
+    const { translate } = await import('../../lib/translator');
     assert.ok(typeof translate === 'function');
   });
 });

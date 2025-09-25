@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Search, Filter, Download, Upload, Edit3, Trash2, Plus, BarChart3, BookOpen, Languages, TrendingUp, X } from 'lucide-react'
-import DictionaryAnalytics from '@/app/components/DictionaryAnalytics'
-import BulkEditModal from '@/app/components/BulkEditModal'
-import EtymologyTree from '@/app/components/EtymologyTree'
+import { Search, Edit3, Trash2, Plus, BarChart3, BookOpen, Languages, X } from 'lucide-react'
+import DictionaryAnalytics from '../../components/DictionaryAnalytics'
+import BulkEditModal from '../../components/BulkEditModal'
+import EtymologyTree from '../../components/EtymologyTree'
 
 interface DictionaryEntry {
   english: string
@@ -128,29 +128,7 @@ export default function DictionaryDashboard() {
     return Array.from(cats).sort()
   }, [entries])
 
-  // Analytics data
-  const analytics = useMemo(() => {
-    const totalEntries = entries.length
-    const withNotes = entries.filter(e => e.notes).length
-    const withEtymology = entries.filter(e => e.etymology?.length).length
-    const mostUsed = entries
-      .filter(e => e.usage_count)
-      .sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0))
-      .slice(0, 10)
-
-    const categoryStats = categories.map(cat => ({
-      category: cat,
-      count: entries.filter(e => e.section === cat).length
-    }))
-
-    return {
-      totalEntries,
-      withNotes,
-      withEtymology,
-      mostUsed,
-      categoryStats
-    }
-  }, [entries, categories])
+  // Analytics data computation removed (not currently used in UI)
 
   const handleSelectEntry = (english: string) => {
     const newSelected = new Set(selectedEntries)

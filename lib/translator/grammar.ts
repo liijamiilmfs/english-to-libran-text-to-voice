@@ -13,7 +13,7 @@ export function applyGrammarRules(tokens: Token[], variant: 'ancient' | 'modern'
   return punctuationTokens
 }
 
-function applyWordOrder(tokens: Token[], variant: 'ancient' | 'modern'): Token[] {
+function applyWordOrder(tokens: Token[], _variant: 'ancient' | 'modern'): Token[] {
   // Librán typically uses SOV (Subject-Object-Verb) word order
   // This is a simplified implementation
   

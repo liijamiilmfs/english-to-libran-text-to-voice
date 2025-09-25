@@ -16,9 +16,46 @@ const KNOWN_HYPHEN_PREFIXES = new Set([
 ])
 
 function normalizeDiacritics(text: string): string {
-  // Preserve UTF-8 diacritics exactly, just normalize to NFC form for consistent handling
+  // Normalize diacritics - remove accents but preserve Librán special characters
   // This matches the Python implementation's normalize_diacritics function
-  return text.normalize('NFC')
+  
+  // First, preserve Librán special characters by replacing them temporarily
+  const libranChars: Record<string, string> = {
+    'í': 'LIBRAN_I_ACUTE',
+    'ë': 'LIBRAN_E_DIAERESIS'
+  }
+  
+  let result = text
+  const preserved: Record<string, string> = {}
+  
+  // Store Librán characters
+  Object.entries(libranChars).forEach(([char, placeholder]) => {
+    if (result.includes(char)) {
+      preserved[placeholder] = char
+      result = result.replace(new RegExp(char, 'g'), placeholder)
+    }
+  })
+  
+  // Normalize other diacritics
+  result = result
+    .normalize('NFD') // Decompose characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
+    .normalize('NFC') // Recompose
+    .replace(/[àáâãäå]/g, 'a')
+    .replace(/[èéêë]/g, 'e')
+    .replace(/[ìíîï]/g, 'i')
+    .replace(/[òóôõö]/g, 'o')
+    .replace(/[ùúûü]/g, 'u')
+    .replace(/[ýÿ]/g, 'y')
+    .replace(/[ñ]/g, 'n')
+    .replace(/[ç]/g, 'c')
+  
+  // Restore Librán characters
+  Object.entries(preserved).forEach(([placeholder, char]) => {
+    result = result.replace(new RegExp(placeholder, 'g'), char)
+  })
+  
+  return result
 }
 
 export function normalizeLigatures(text: string): string {
@@ -131,14 +168,12 @@ export function cleanHeadword(word: string): string {
     return ''
   }
 
-  // Remove leading/trailing punctuation except apostrophes
-  let cleaned = word.replace(/^[^\w']+/, '').replace(/[^\w']+$/, '')
-  
-  const whitespaceNormalized = normalizeWhitespace(cleaned)
+  // Normalize whitespace and ligatures first
+  const whitespaceNormalized = normalizeWhitespace(word)
   const ligaturesNormalized = normalizeLigatures(whitespaceNormalized)
   
-  // Preserve diacritics (don't strip them)
-  return normalizeDiacritics(ligaturesNormalized)
+  // Don't strip punctuation - preserve it as is
+  return ligaturesNormalized
 }
 
 export function cleanTranslation(text: string): string {

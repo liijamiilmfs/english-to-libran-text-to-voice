@@ -110,11 +110,26 @@ public
 
 # Build outputs
 dist/
-build/
+dist-test/
+dist-workers/
 *.exe
 *.dll
 *.so
 *.dylib
+
+# Python virtual environment
+venv/
+env/
+.env/
+
+# GPT Task Runner files (other project) - only exclude the root src/ and tests/ directories
+src/
+tests/
+
+# Build cache but keep important build files
+build/
+!build/json-dicts/
+!build/python-test/
 
 # IDE files
 .vscode/
@@ -192,3 +207,16 @@ Thumbs.db
 
 # Gpt-runner-scripts
 scripts/gpt_runner_*.ps1
+
+# Temporary test files
+test-temp/
+*.test.html
+
+# TypeScript config files that shouldn't be tracked
+jsconfig.json
+
+# Tools directory (contains Python tools)
+tools/
+
+# Lib types directory (generated files)
+lib/types/

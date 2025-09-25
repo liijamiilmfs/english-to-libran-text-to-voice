@@ -1,6 +1,6 @@
 'use client'
 
-import { VoiceAccent } from '@/lib/voices'
+import { VoiceAccent } from '../../lib/voices'
 
 interface AccentSelectorProps {
   selectedAccent: VoiceAccent | null

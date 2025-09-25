@@ -22,7 +22,7 @@ interface DictionaryMetadata {
   sections: Record<string, number>
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Load the unified dictionary
     const dictionaryPath = join(process.cwd(), 'data', 'UnifiedLibranDictionaryv1.7.0.json')
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { action, entry } = body
+    const { action } = body
 
     switch (action) {
       case 'add':

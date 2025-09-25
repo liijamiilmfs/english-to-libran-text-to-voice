@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { Play, Save, Trash2, Volume2, Star, Plus, Settings, Wand2 } from 'lucide-react'
-import { VoiceProfile, VOICE_PROFILES, VoiceAccent } from '@/lib/voices'
+import React, { useState, useEffect, useMemo } from 'react';
+import { Play, Save, Trash2, Volume2, Star, Wand2 } from 'lucide-react';
+import type { VoiceProfile, VoiceAccent } from '../../lib/voices';
+import { VOICE_PROFILES } from '../../lib/voices';
+import type { VoiceFilter } from '../../lib/dynamic-voice-filter';
 import { 
-  VoiceFilter, 
   createVoiceFilter, 
   saveVoiceFilter, 
   getSavedVoiceFilters, 
@@ -12,7 +13,7 @@ import {
   updateFilterUsage,
   describeVoiceCharacteristics,
   characteristicsToTTSParams
-} from '@/lib/dynamic-voice-filter'
+} from '../../lib/dynamic-voice-filter'
 import AccentSelector from './AccentSelector'
 
 interface IntegratedVoiceSelectorProps {

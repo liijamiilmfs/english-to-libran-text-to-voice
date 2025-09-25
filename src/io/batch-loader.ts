@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import csv from 'csv-parser';
+import * as csv from 'csv-parser';
 import { TaskRequest, BatchInput } from '../types';
 
 export class BatchLoader {
