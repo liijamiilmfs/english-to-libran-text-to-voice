@@ -153,7 +153,6 @@ describe('Logger', () => {
 
   describe('Data sanitization', () => {
     it('should sanitize API keys', () => {
-      const corrId = generateCorrelationId()
       assert.doesNotThrow(() => {
         log.info('Test with API key', { 
           apiKey: 'sk-1234567890abcdef1234567890abcdef1234567890',
@@ -163,7 +162,6 @@ describe('Logger', () => {
     })
     
     it('should sanitize email addresses', () => {
-      const corrId = generateCorrelationId()
       assert.doesNotThrow(() => {
         log.info('Test with email', { 
           email: 'test@example.com',
@@ -173,7 +171,6 @@ describe('Logger', () => {
     })
     
     it('should convert duration from seconds to milliseconds', () => {
-      const corrId = generateCorrelationId()
       assert.doesNotThrow(() => {
         log.info('Test duration conversion', { 
           duration: 1.5, // 1.5 seconds

@@ -16,7 +16,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "node"
   },
   "include": [
     "test/**/*.ts",
@@ -35,8 +38,6 @@
     "src",
     "venv",
     "tools",
-    "lib/cleanup-handler.ts",
-    "**/*.test.ts",
-    "**/*.spec.ts"
+    "lib/cleanup-handler.ts"
   ]
 }

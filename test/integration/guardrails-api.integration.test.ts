@@ -5,11 +5,9 @@
 // Set test environment before any imports
 process.env.NODE_ENV = 'test'
 
-import { describe, it, beforeAll, afterAll } from 'vitest'
+import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest'
 import { assert } from 'vitest'
 import { NextRequest } from 'next/server'
-import { createRateLimiter } from '../../lib/rate-limiter'
-import { createBudgetGuardrails } from '../../lib/budget-guardrails'
 import { withGuardrails, resetGuardrails } from '../../lib/api-guardrails'
 
 describe('Guardrails API Integration', () => {
@@ -23,7 +21,7 @@ describe('Guardrails API Integration', () => {
 
   describe('Rate Limiting', () => {
     it('should allow requests within rate limit', async () => {
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -47,7 +45,7 @@ describe('Guardrails API Integration', () => {
     })
 
     it('should block requests exceeding rate limit', async () => {
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -85,10 +83,6 @@ describe('Guardrails API Integration', () => {
       
       // If we get here, rate limiting didn't work
       assert.fail('Rate limiting should have kicked in after 1000 requests')
-      
-      const body = await response.json()
-      assert.equal(body.error, 'Rate limit exceeded')
-      assert.ok(body.retryAfter)
     })
   })
 
@@ -100,7 +94,7 @@ describe('Guardrails API Integration', () => {
     })
 
     it('should allow requests within budget', async () => {
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -124,7 +118,7 @@ describe('Guardrails API Integration', () => {
     })
 
     it('should block requests exceeding per-request character limit', async () => {
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -154,7 +148,7 @@ describe('Guardrails API Integration', () => {
     })
 
     it('should block requests exceeding daily character limit', async () => {
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -206,7 +200,7 @@ describe('Guardrails API Integration', () => {
       const { budgetGuardrails } = await import('../../lib/budget-guardrails')
       budgetGuardrails.reset()
       
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -237,7 +231,7 @@ describe('Guardrails API Integration', () => {
 
   describe('Error Handling', () => {
     it('should handle handler errors gracefully', async () => {
-      const mockHandler = async (request: NextRequest) => {
+      const mockHandler = async (_request: NextRequest) => {
         throw new Error('Handler error')
       }
 

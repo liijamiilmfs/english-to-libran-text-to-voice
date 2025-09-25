@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest'
 import { assert } from 'vitest'
-import { log, sanitizeLogData } from '../../lib/logger'
+import { sanitizeLogData } from '../../lib/logger'
 
 describe('Sensitive Data Sanitization', () => {
   it('should redact all sensitive keys, not just the first one', () => {
