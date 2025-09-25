@@ -235,7 +235,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-5 py-8">
+        <div className="max-w-6xl mx-auto px-5 py-8">
         {/* Header */}
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-libran-red to-libran-gold bg-clip-text text-transparent">
