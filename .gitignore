@@ -175,3 +175,6 @@ audit-report-*.csv
 audit-detailed-*.txt
 qa-report-*.json
 qa-report-*.csv
+
+# GPT Runner milestone scripts (generated files)
+scripts/gpt_runner_milestones*.ps1
