@@ -26,7 +26,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
     if (selectedPhrase) {
       onPhraseSelect(selectedPhrase, selectedVariant)
     }
-  }, [selectedVariant, selectedPhrase, onPhraseSelect])
+  }, [selectedVariant, selectedPhrase]) // Removed onPhraseSelect from dependencies to prevent infinite loop
 
   const loadCategories = useCallback(async () => {
     try {

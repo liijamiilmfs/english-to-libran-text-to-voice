@@ -5,6 +5,9 @@ import { log, generateCorrelationId, LogEvents } from '@/lib/logger'
 import { ttsCache } from '@/lib/tts-cache'
 import { withGuardrails } from '@/lib/api-guardrails'
 import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
+import { VOICE_PROFILES, Voice, selectVoiceForCharacteristics } from '@/lib/voices'
+import { validateVoiceFilter, characteristicsToTTSParams } from '@/lib/dynamic-voice-filter'
+
 
 async function handleSpeakRequest(request: NextRequest) {
   const startTime = Date.now()
@@ -13,6 +16,7 @@ async function handleSpeakRequest(request: NextRequest) {
   let audioDuration = 0
   let libranText = ''
   let voice = 'alloy'
+  let selectedVoice: Voice = 'alloy' // Initialize selectedVoice for error handling
   const requestId = generateCorrelationId()
 
   log.apiRequest('POST', '/api/speak', requestId)
@@ -22,6 +26,22 @@ async function handleSpeakRequest(request: NextRequest) {
     libranText = requestBody.libranText || ''
     voice = requestBody.voice || (process.env.OPENAI_TTS_VOICE ?? 'alloy')
     const format = requestBody.format || (process.env.AUDIO_FORMAT ?? 'mp3')
+    // Validate and sanitize voice filter if provided
+    const rawVoiceFilter = requestBody.voiceFilter;
+    const voiceFilter = rawVoiceFilter ? validateVoiceFilter(rawVoiceFilter) : null;
+    
+    // Debug logging
+    if (rawVoiceFilter) {
+      log.info('Voice filter received', {
+        corr_id: requestId,
+        ctx: {
+          hasRawFilter: !!rawVoiceFilter,
+          hasValidatedFilter: !!voiceFilter,
+          rawFilterKeys: Object.keys(rawVoiceFilter),
+          characteristicsKeys: rawVoiceFilter.characteristics ? Object.keys(rawVoiceFilter.characteristics) : 'none'
+        }
+      });
+    }
 
     if (!libranText || typeof libranText !== 'string') {
       const errorResponse = createErrorResponse(ErrorCode.VALIDATION_MISSING_TEXT, { requestId })
@@ -30,11 +50,55 @@ async function handleSpeakRequest(request: NextRequest) {
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
 
-    // Validate voice parameter
-    const validVoices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']
-    if (!validVoices.includes(voice)) {
-      const errorResponse = createErrorResponse(ErrorCode.VALIDATION_INVALID_VOICE, { requestId, voice })
-      log.validationFail('voice', 'Invalid voice parameter', requestId, { voice })
+    // Select voice based on characteristics and accent
+    selectedVoice = voice as Voice;
+    const accentOverride = requestBody.accent;
+    
+    if (voiceFilter) {
+      try {
+        selectedVoice = selectVoiceForCharacteristics(voiceFilter, accentOverride);
+        log.info('Voice selected based on characteristics and accent', {
+          corr_id: requestId,
+          ctx: {
+            originalVoice: voice,
+            selectedVoice: selectedVoice,
+            voiceFilterPrompt: voiceFilter.prompt,
+            accentOverride: accentOverride
+          }
+        });
+      } catch (error) {
+        log.error('Voice selection failed, using original voice', {
+          corr_id: requestId,
+          ctx: { error: error instanceof Error ? error.message : 'Unknown error', originalVoice: voice }
+        });
+        selectedVoice = voice as Voice;
+      }
+    } else if (accentOverride) {
+      // If no voice filter but accent is specified, select a voice with that accent
+      const voicesWithAccent = Object.values(VOICE_PROFILES).filter(v => v.accent === accentOverride);
+      if (voicesWithAccent.length > 0) {
+        selectedVoice = voicesWithAccent[0].id;
+        log.info('Voice selected based on accent only', {
+          corr_id: requestId,
+          ctx: {
+            originalVoice: voice,
+            selectedVoice: selectedVoice,
+            accentOverride: accentOverride
+          }
+        });
+      } else {
+        log.warn('No voices found with accent, using original voice', {
+          corr_id: requestId,
+          ctx: { accentOverride, originalVoice: voice }
+        });
+      }
+    }
+
+    // Validate voice parameter using the enhanced voice system
+    const validVoices = Object.keys(VOICE_PROFILES) as Voice[]
+    if (!validVoices.includes(selectedVoice)) {
+      const errorResponse = createErrorResponse(ErrorCode.VALIDATION_INVALID_VOICE, { requestId, voice: selectedVoice })
+      log.validationFail('voice', 'Invalid voice parameter', requestId, { voice: selectedVoice })
       metrics.recordError('validation_error', 'Invalid voice parameter')
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
@@ -49,15 +113,29 @@ async function handleSpeakRequest(request: NextRequest) {
     }
 
     characterCount = libranText.length
+    
+    // Log voice selection with enhanced metadata
+    const voiceProfile = VOICE_PROFILES[selectedVoice]
     log.info('Starting TTS generation', {
       event: LogEvents.TTS_START,
       corr_id: requestId,
-      ctx: { text_length: libranText.length, voice, format }
+      ctx: { 
+        text_length: libranText.length, 
+        voice, 
+        voice_characteristics: voiceProfile.characteristics,
+        voice_mood: voiceProfile.mood,
+        voice_suitability: voiceProfile.libránSuitability,
+        format,
+        has_voice_filter: !!voiceFilter,
+        voice_filter_prompt: voiceFilter?.prompt
+      }
     })
 
-    // Check cache first
+    // Check cache first - use selectedVoice for cache key to prevent cache poisoning
     const model = process.env.OPENAI_TTS_MODEL ?? 'gpt-4o-mini-tts'
-    const cacheKey = ttsCache.generateHash(libranText, voice, format, model)
+    // Include accent and filter info in cache key for maximum specificity
+    const cacheKeySuffix = `${selectedVoice}${accentOverride ? `|accent:${accentOverride}` : ''}${voiceFilter ? `|filter:${voiceFilter.prompt?.slice(0, 50)}` : ''}`
+    const cacheKey = ttsCache.generateHash(libranText, cacheKeySuffix, format, model)
     
     let audioBuffer: Buffer
     let isCacheHit = false
@@ -67,7 +145,7 @@ async function handleSpeakRequest(request: NextRequest) {
     if (cachedAudio) {
       audioBuffer = cachedAudio
       isCacheHit = true
-      log.ttsCacheHit(libranText, voice, requestId, { cacheKey, bufferSize: audioBuffer.length })
+      log.ttsCacheHit(libranText, selectedVoice, requestId, { cacheKey, bufferSize: audioBuffer.length })
     } else {
       // Generate new audio using OpenAI TTS
       log.info('TTS cache miss, generating new audio', {
@@ -79,11 +157,27 @@ async function handleSpeakRequest(request: NextRequest) {
         apiKey: process.env.OPENAI_API_KEY! 
       });
       
+      // Apply voice filter characteristics if provided
+      const ttsParams = voiceFilter 
+        ? characteristicsToTTSParams(voiceFilter.characteristics)
+        : { speed: voiceProfile.energy === 'low' ? 0.7 : voiceProfile.energy === 'high' ? 1.2 : 1.0 }
+      
+      // Debug TTS parameters
+      log.info('TTS parameters generated', {
+        corr_id: requestId,
+        ctx: {
+          hasVoiceFilter: !!voiceFilter,
+          ttsSpeed: ttsParams.speed,
+          voiceProfileSpeed: voiceProfile.energy === 'low' ? 0.7 : voiceProfile.energy === 'high' ? 1.2 : 1.0
+        }
+      });
+
       const response = await client.audio.speech.create({
         model: model,
-        voice: voice as any,
+        voice: selectedVoice as any,
         input: libranText,
         response_format: format as any,
+        speed: ttsParams.speed
       });
 
       audioBuffer = Buffer.from(await response.arrayBuffer())
@@ -95,7 +189,7 @@ async function handleSpeakRequest(request: NextRequest) {
       await ttsCache.storeCachedAudio(
         cacheKey,
         libranText,
-        voice,
+        cacheKeySuffix,
         format,
         model,
         audioBuffer,
@@ -110,7 +204,7 @@ async function handleSpeakRequest(request: NextRequest) {
     audioDuration = (wordCount / 150) * 60 // seconds
 
     // Log TTS generation completion
-    log.tts(libranText, voice, audioDuration * 1000, requestId, {
+    log.tts(libranText, selectedVoice, audioDuration * 1000, requestId, {
       format,
       wordCount,
       bufferSize: audioBuffer.length,
@@ -137,6 +231,7 @@ async function handleSpeakRequest(request: NextRequest) {
       headers.set('X-Cache-Status', 'MISS')
     }
     headers.set('Content-Disposition', `attachment; filename="libran-audio.${format}"`)
+    headers.set('X-Voice-Profile', JSON.stringify(voiceProfile))
 
     return new NextResponse(audioBuffer as any, {
       status: 200,
@@ -149,14 +244,14 @@ async function handleSpeakRequest(request: NextRequest) {
     // Handle specific OpenAI errors
     if (error.status === 429) {
       const errorResponse = createErrorResponse(ErrorCode.OPENAI_QUOTA_EXCEEDED, { requestId })
-      log.ttsRateLimit(libranText || '', voice || 'alloy', requestId, { error: errorMessage })
+      log.ttsRateLimit(libranText || '', selectedVoice || 'alloy', requestId, { error: errorMessage })
       metrics.recordError('openai_quota_error', 'OpenAI quota exceeded')
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
 
     if (error.type === 'insufficient_quota') {
       const errorResponse = createErrorResponse(ErrorCode.OPENAI_QUOTA_EXCEEDED, { requestId })
-      log.ttsRateLimit(libranText || '', voice || 'alloy', requestId, { error: errorMessage })
+      log.ttsRateLimit(libranText || '', selectedVoice || 'alloy', requestId, { error: errorMessage })
       metrics.recordError('openai_quota_error', 'OpenAI insufficient quota')
       return NextResponse.json(errorResponse.body, { status: errorResponse.status })
     }
