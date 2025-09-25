@@ -48,7 +48,7 @@ export default function IntegratedVoiceSelector({
   // Generate characteristics from current prompt
   const currentCharacteristics = useMemo(() => {
     if (!prompt.trim()) return null
-    return createVoiceFilter(prompt).characteristics
+    return createVoiceFilter(prompt).characteristics;
   }, [prompt])
 
   const handlePresetVoiceSelect = (voice: VoiceProfile) => {
@@ -59,14 +59,10 @@ export default function IntegratedVoiceSelector({
   const handleCreateFilter = () => {
     if (!prompt.trim()) return
 
-    console.log('=== CREATING VOICE FILTER ===');
-    console.log('Prompt:', prompt);
-    console.log('Filter name:', filterName);
+    // Debug logging removed for production build
     
     const filter = createVoiceFilter(prompt, filterName || undefined)
-    console.log('Created voice filter:', filter)
-    console.log('Characteristics:', filter.characteristics)
-    console.log('TTS Params:', characteristicsToTTSParams(filter.characteristics))
+    // Debug logging removed for production build
     
     saveVoiceFilter(filter)
     setSavedFilters(getSavedVoiceFilters())
@@ -99,7 +95,7 @@ export default function IntegratedVoiceSelector({
       const sampleText = "Salaam dunya, kama ana huna al-yaum"
       const voiceFilterData = createVoiceFilter(prompt, 'Preview Filter')
       
-      console.log('Sending voice filter for preview:', voiceFilterData)
+      // Debug logging removed for production build
       
       const response = await fetch('/api/speak', {
         method: 'POST',
