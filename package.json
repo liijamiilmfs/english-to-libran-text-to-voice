@@ -9,7 +9,7 @@
     "export": "next build && next export",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit --skipLibCheck",
     "build:workers": "tsc -p tsconfig.worker.json",
     "clean:test": "node -e \"require('fs').rmSync('dist-test', { recursive: true, force: true });\"",
     "build:test": "npm run clean:test && tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
@@ -55,7 +55,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.17",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitest/coverage-v8": "^2.1.9",

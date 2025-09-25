@@ -76,6 +76,7 @@ jspm_packages/
 
 # Next.js build output
 .next
+next-env.d.ts
 
 # Nuxt.js build / generate output
 .nuxt
@@ -175,6 +176,10 @@ audit-report-*.csv
 audit-detailed-*.txt
 qa-report-*.json
 qa-report-*.csv
+
+# GPT Runner milestone scripts (generated files)
+scripts/gpt_runner_milestones*.ps1
+
 # Cleanup additions
 audit-reports/
 *.log
@@ -182,3 +187,4 @@ audit-reports/
 *.temp
 .DS_Store
 Thumbs.db
+
