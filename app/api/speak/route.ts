@@ -22,6 +22,11 @@ async function handleSpeakRequest(request: NextRequest) {
     libranText = requestBody.libranText || ''
     voice = requestBody.voice || (process.env.OPENAI_TTS_VOICE ?? 'alloy')
     const format = requestBody.format || (process.env.AUDIO_FORMAT ?? 'mp3')
+    
+    // Extract voice filter parameters for cache key
+    const voiceFilter = requestBody.voiceFilter || null
+    const accent = requestBody.accent || null
+    const simpleVoiceId = requestBody.simpleVoiceId || null
 
     if (!libranText || typeof libranText !== 'string') {
       const errorResponse = createErrorResponse(ErrorCode.VALIDATION_MISSING_TEXT, { requestId })
@@ -55,9 +60,26 @@ async function handleSpeakRequest(request: NextRequest) {
       ctx: { text_length: libranText.length, voice, format }
     })
 
-    // Check cache first
+    // Check cache first - include voice filter parameters for proper cache differentiation
     const model = process.env.OPENAI_TTS_MODEL ?? 'gpt-4o-mini-tts'
-    const cacheKey = ttsCache.generateHash(libranText, voice, format, model)
+    const additionalParams: Record<string, any> = {}
+    
+    // Include voice filter characteristics if present
+    if (voiceFilter) {
+      additionalParams.voiceFilter = voiceFilter
+    }
+    
+    // Include accent if present
+    if (accent) {
+      additionalParams.accent = accent
+    }
+    
+    // Include simple voice ID if present
+    if (simpleVoiceId) {
+      additionalParams.simpleVoiceId = simpleVoiceId
+    }
+    
+    const cacheKey = ttsCache.generateHash(libranText, voice, format, model, additionalParams)
     
     let audioBuffer: Buffer
     let isCacheHit = false
