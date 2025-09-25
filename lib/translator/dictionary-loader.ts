@@ -39,6 +39,7 @@ export async function loadDictionary(variant: 'ancient' | 'modern'): Promise<Dic
   }
 
   try {
+    // Use process.cwd() for path resolution in both dev and test environments
     const dictionaryPath = path.join(process.cwd(), 'lib', 'translator', 'dictionaries', `${variant}.json`)
     const dictionaryData = fs.readFileSync(dictionaryPath, 'utf-8')
     const rawDictionary = JSON.parse(dictionaryData)

@@ -54,11 +54,7 @@
   "nonbeing": "Non-Esse",
   "spirit": "Spiritus",
   "mind": "Mens",
-<<<<<<< HEAD
   "body": "Corpus",
-=======
-  "body": "pus",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "name (essence)": "Nomen",
   "light": "Lux",
   "darkness": "Tenebrae",
@@ -73,11 +69,7 @@
   "sacredness": "Sanctitas",
   "profane state": "Profanitas",
   "purity": "Castitas",
-<<<<<<< HEAD
   "corruption": "Corruptio",
-=======
-  "corruption": "ruptio",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "harmony of spheres": "HarmoniaSphaerarum",
   "knowledge": "Scientia",
   "understanding": "Intellegentia",
@@ -163,11 +155,7 @@
   "impure": "Impurus",
   "eternal": "Aeternus",
   "fleeting": "Caducus",
-<<<<<<< HEAD
   "visible": "Visibilis",
-=======
-  "visible": "ibilis",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "hidden": "Occultus",
   "possible": "Possibilis",
   "impossible": "Impossibilis",
@@ -305,11 +293,7 @@
   "seal": "Sealor",
   "walrus": "Walrusor",
   "sabertooth": "Sabertoothor",
-<<<<<<< HEAD
   "warg": "Wargor",
-=======
-  "warg": "Bellum",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "camel": "Camelor",
   "lizard": "Lizardor",
   "serpent": "Serpentor",
@@ -386,11 +370,7 @@
   "pepper": "Pepperor",
   "cocoa": "Cocoaor",
   "coffee": "Coffeeor",
-<<<<<<< HEAD
   "tea": "Teaor",
-=======
-  "tea": "Magister",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "flax": "Flaxor",
   "hemp": "Hempor",
   "cotton": "Cotton",
@@ -411,11 +391,7 @@
   "jay": "Jayor",
   "magpie": "Magpieor",
   "gooseander": "Gooseanderor",
-<<<<<<< HEAD
   "cormorant": "Cormorantor",
-=======
-  "cormorant": "morantor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "pelican": "Pelicanis",
   "puffin": "Puffinis",
   "auk": "Aukor",
@@ -453,21 +429,13 @@
   "mint": "Mintor",
   "oregano": "Oreganoor",
   "cumin": "Cuminis",
-<<<<<<< HEAD
   "coriander": "Corianderor",
-=======
-  "coriander": "ianderor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "dill": "Dillor",
   "anise": "Aniseor",
   "caraway": "Carawayor",
   "saffron": "Saffron",
   "cinnamon": "Sinnamon",
-<<<<<<< HEAD
   "clove": "Cloveor",
-=======
-  "clove": "Amor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "nutmeg": "Nutmegor",
   "ginger": "Gingeror",
   "turmeric": "Turmericor",
@@ -487,11 +455,7 @@
   "kale": "Kaleor",
   "broccoli": "Broccolior",
   "cauliflower": "Caulifloweror",
-<<<<<<< HEAD
   "pea": "Pisum",
-=======
-  "pea": "Pax",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "bean": "Beanis",
   "chickpea": "Kickpeaor",
   "lentil": "Lentilor",
@@ -502,15 +466,9 @@
   "sugarcane": "Sugarcaneor",
   "sugar beet": "Sugarbeetor",
   "tobacco": "Tobaccoor",
-<<<<<<< HEAD
   "hop": "Hopor",
   "barleycorn": "Barleycornis",
   "sorghum": "Sorgum",
-=======
-  "hop": "Spes",
-  "barleycorn": "Barleycornis",
-  "sorghum": "um",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "bambusa": "Bambusaor",
   "bamboo": "Bambooor",
   "lotusroot": "Lotusrootor",
@@ -534,11 +492,7 @@
   "your (sg)": "teon",
   "his": "eion",
   "her (possessive)": "eonæ",
-<<<<<<< HEAD
   "our": "neon",
-=======
-  "our": "Fortitudo",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "your (pl)": "veon",
   "their (animate)": "illon",
   "their (inanimate)": "eononæ",
@@ -584,17 +538,10 @@
   "maybe": "fortasse",
   "must (particle)": "oportet",
   "can (particle)": "licet",
-<<<<<<< HEAD
   "cannot (particle)": "non licet",
   "will (future particle)": "volo",
   "would (conditional)": "vellem",
   "question marker (polar)": "-ne",
-=======
-  "cannot (particle)": "nonlicet",
-  "will (future particle)": "volo",
-  "would (conditional)": "vellem",
-  "question marker (polar)": "ne",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "mountain": "Mons",
   "hill": "Collisor",
   "cliff": "Rupor",
@@ -662,11 +609,7 @@
   "gate": "Portor",
   "bridge": "Pontor",
   "harbor": "Portusor",
-<<<<<<< HEAD
   "ice": "Glacior",
-=======
-  "ice": "Iustitia",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "bazaar": "Bazaror",
   "granary": "Horreor",
   "barn": "Horrior",
@@ -743,7 +686,6 @@
   "family": "familia",
   "kin": "rudor",
   "descendant (poetic)": "progenor",
-<<<<<<< HEAD
   "head": "Caput",
   "hair": "Capillus",
   "face": "facior",
@@ -786,50 +728,6 @@
   "artery": "Arteria",
   "pulse": "pulsor",
   "nail": "Unguis",
-=======
-  "head": "capitor",
-  "hair": "crinor",
-  "face": "facior",
-  "eye": "oculara",
-  "ear": "aurora",
-  "nose": "nasor",
-  "mouth": "orora",
-  "tooth": "dentor",
-  "tongue": "lingua",
-  "neck": "collor",
-  "shoulder": "umeror",
-  "arm": "Agricola",
-  "elbow": "Arcus",
-  "lover": "Amor",
-  "finger": "digitor",
-  "thumb": "pollexor",
-  "chest": "pector",
-  "back": "dorsor",
-  "heart": "ara",
-  "lung": "pulmonor",
-  "belly": "ventor",
-  "hip": "coxor",
-  "leg": "cruror",
-  "knee": "genuor",
-  "foot": "pedor",
-  "toe": "digitior",
-  "bone": "ossor",
-  "skin": "cutor",
-  "brain": "cerebror",
-  "sinew": "nervor",
-  "muscle": "musculor",
-  "stomach": "stomacor",
-  "liver": "heparor",
-  "kidney": "renor",
-  "spleen": "lienor",
-  "throat": "gutturor",
-  "breath": "spiror",
-  "shadow (body)": "umbra",
-  "womb": "uteror",
-  "artery": "arterior",
-  "pulse": "pulsor",
-  "nail": "unguisor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "jaw": "maxillor",
   "cheek": "genor",
   "eyebrow": "supercilior",
@@ -839,13 +737,8 @@
   "tear": "lacrimor",
   "urine": "urinor",
   "seed (sperm)": "seminor",
-<<<<<<< HEAD
   "heart-blood (poetic)": "cor-soror",
   "spine": "Spina",
-=======
-  "heart-blood (poetic)": "soror",
-  "spine": "spinalor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "rib": "costor",
   "shoulderblade": "scapulor",
   "ankle": "talonor",
@@ -952,11 +845,7 @@
   "knife": "Knifeor",
   "shears": "Shearsor",
   "clipper": "Clipperor",
-<<<<<<< HEAD
   "vise": "Viseor",
-=======
-  "vise": "eor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "clamp": "Clampor",
   "measuring rod": "Measuringrodor",
   "square (tool)": "Scuareor",
@@ -994,11 +883,7 @@
   "staff": "Staffor",
   "cup": "Cupor",
   "mug": "Mugor",
-<<<<<<< HEAD
   "bowl": "Catinus",
-=======
-  "bowl": "Arcus",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "plate": "Plateor",
   "fork": "Forkor",
   "pot": "Potor",
@@ -1087,11 +972,7 @@
   "pin": "Pinis",
   "peg": "Pegor",
   "rope": "Ropeor",
-<<<<<<< HEAD
   "cord": "Cordor",
-=======
-  "cord": "dor",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "strap": "Strapor",
   "chain": "Kainis",
   "hinge": "Hingeor",
@@ -1180,11 +1061,7 @@
   "shekel": "Sicelus",
   "obol": "Obolos",
   "zino": "Zinon",
-<<<<<<< HEAD
   "crown": "Corona",
-=======
-  "crown": "ona",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "sovereign": "Sovranus",
   "guilders": "Guldinus",
   "minae": "Mina",
@@ -1275,11 +1152,7 @@
   "to grind": "Molere",
   "to bake": "Coquere",
   "to brew": "Brasare",
-<<<<<<< HEAD
   "to tan (leather)": "Coriare",
-=======
-  "to tan (leather)": "iare",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "to dye": "Tingere",
   "to measure": "Metiri",
   "to weigh": "Pendere",
@@ -1344,11 +1217,7 @@
   "treacherous": "Perfidus",
   "pious": "Pius",
   "impious": "Impius",
-<<<<<<< HEAD
   "angry": "Iratus",
-=======
-  "angry": "tus",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "joyful": "Laetus",
   "sad": "Tristis",
   "calm": "Placidus",
@@ -1565,11 +1434,7 @@
   "to tan": "Conciare",
   "pelt": "Tergum",
   "vat": "Lacus",
-<<<<<<< HEAD
   "bark (tanning)": "Cortex",
-=======
-  "bark (tanning)": "tex",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "gem": "Gemma",
   "to cut (gem)": "Caelare",
   "pearl": "Margarita",
@@ -1791,11 +1656,7 @@
   "chime": "Tinnitus",
   "flute": "Tibia",
   "pipe": "Fistula",
-<<<<<<< HEAD
   "horn": "Cornu",
-=======
-  "horn": "nu",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "trumpet": "Tuba",
   "bugle": "Buccina",
   "organ": "Organum",
@@ -2058,11 +1919,7 @@
   "atmosphere": "Aer",
   "climate": "Clima",
   "aurora": "Auroraborealis",
-<<<<<<< HEAD
   "lightning flash": "Coruscatio",
-=======
-  "lightning flash": "uscatio",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "thunderclap": "Fragor",
   "rumble": "Murmur",
   "earthquake": "Terraemotus",
@@ -2092,11 +1949,7 @@
   "precipitation": "Praecipitatio",
   "haze": "Caligo",
   "smog": "Nebulanoxia",
-<<<<<<< HEAD
   "visibility": "Visibilitas",
-=======
-  "visibility": "ibilitas",
->>>>>>> 64bafda (chore(dict): refresh Librán dictionaries for v1.7.0)
   "horizon": "Horizon",
   "zenith": "Zenith",
   "nadir": "Nadir",
