@@ -9,7 +9,7 @@
     "export": "next build && next export",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit --skipLibCheck",
+    "type-check": "tsc --noEmit",
     "build:workers": "tsc -p tsconfig.worker.json",
     "clean:test": "node -e \"require('fs').rmSync('dist-test', { recursive: true, force: true });\"",
     "build:test": "npm run clean:test && tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
