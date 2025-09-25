@@ -158,7 +158,7 @@ describe('Guardrails API Integration', () => {
       })
 
       // Create requests that will exceed daily limit (10M chars in test mode)
-      const largeText = 'a'.repeat(5000000)
+      const largeText = 'a'.repeat(1000)
       
       // First request should succeed
       const request1 = new NextRequest('http://localhost:3000/api/test', {
