@@ -75,27 +75,30 @@ export function cleanupAll(): void {
 
 // Set up global cleanup handlers
 if (typeof process !== 'undefined') {
-  process.on('exit', cleanupAll)
-  process.on('SIGINT', () => {
-    cleanupAll()
-    // Force exit immediately to avoid logger issues
-    process.exit(0)
-  })
-  process.on('SIGTERM', () => {
-    cleanupAll()
-    // Force exit immediately to avoid logger issues
-    process.exit(0)
-  })
-  process.on('uncaughtException', (error) => {
-    console.error('Uncaught exception, cleaning up:', error)
-    cleanupAll()
-    // Force exit immediately to avoid logger issues
-    process.exit(1)
-  })
-  process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection, cleaning up:', reason)
-    cleanupAll()
-    // Force exit immediately to avoid logger issues
-    process.exit(1)
-  })
+  const nodeProcess = process as any
+  if (nodeProcess.on && nodeProcess.exit) {
+    nodeProcess.on('exit', cleanupAll)
+    nodeProcess.on('SIGINT', () => {
+      cleanupAll()
+      // Force exit immediately to avoid logger issues
+      nodeProcess.exit(0)
+    })
+    nodeProcess.on('SIGTERM', () => {
+      cleanupAll()
+      // Force exit immediately to avoid logger issues
+      nodeProcess.exit(0)
+    })
+    nodeProcess.on('uncaughtException', (error: any) => {
+      console.error('Uncaught exception, cleaning up:', error)
+      cleanupAll()
+      // Force exit immediately to avoid logger issues
+      nodeProcess.exit(1)
+    })
+    nodeProcess.on('unhandledRejection', (reason: any) => {
+      console.error('Unhandled rejection, cleaning up:', reason)
+      cleanupAll()
+      // Force exit immediately to avoid logger issues
+      nodeProcess.exit(1)
+    })
+  }
 }

@@ -1,0 +1,42 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist-test",
+    "rootDir": "./",
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    "removeComments": false,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "test/**/*.ts",
+    "lib/**/*.ts",
+    "app/**/*.ts",
+    "components/**/*.ts",
+    "scripts/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-test",
+    "dist-workers",
+    "coverage",
+    "dashboard",
+    "src",
+    "venv",
+    "tools",
+    "lib/cleanup-handler.ts",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}
