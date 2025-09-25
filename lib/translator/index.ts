@@ -8,6 +8,7 @@ export interface TranslationResult {
   libran: string;
   confidence: number;
   wordCount: number;
+  variant: Variant;
 }
 
 export type Variant = 'ancient' | 'modern';
@@ -120,6 +121,15 @@ export async function translate(text: string, variant: Variant, options: Transla
   log.debug('Starting translation', { textLength: text.length, variant, hasCustomDictionary: !!options.dictionary });
   
   const dictionary = options.dictionary ?? await loadDictionaryFromLoader(variant);
+  const effectiveVariant = dictionary.variant ?? variant;
+
+  if (dictionary.variant !== variant) {
+    log.warn('Requested variant unavailable, using fallback dictionary', {
+      requestedVariant: variant,
+      effectiveVariant: dictionary.variant
+    });
+  }
+
   const tokens = tokenize(text);
   const translatedTokens = [];
   let translatedWordCount = 0;
@@ -139,15 +149,15 @@ export async function translate(text: string, variant: Variant, options: Transla
       
       if (translated) {
         // Apply sound shifts and preserve case
-        translated = applySoundShifts(translated, variant);
+        translated = applySoundShifts(translated, effectiveVariant);
         translated = preserveCase(token.original, translated);
         translatedWordCount++;
-        log.debug('Word translated', { original: token.value, translated, variant });
+        log.debug('Word translated', { original: token.value, translated, variant: effectiveVariant });
       } else {
         // Keep original if no translation found
         translated = token.original;
         unknownWords.push(token.value);
-        log.debug('Word not found in dictionary', { word: token.value, variant });
+        log.debug('Word not found in dictionary', { word: token.value, variant: effectiveVariant });
       }
       
       translatedTokens.push({ ...token, value: translated });
@@ -162,13 +172,14 @@ export async function translate(text: string, variant: Variant, options: Transla
   
   // Log unknown tokens for analysis
   if (unknownWords.length > 0) {
-    unknownTokenLogger.logUnknownTokens(unknownWords, variant, text.substring(0, 100))
+    unknownTokenLogger.logUnknownTokens(unknownWords, effectiveVariant, text.substring(0, 100))
       .catch(error => log.error('Failed to log unknown tokens', { error: error.message }));
   }
-  
+
   log.info('Translation completed', {
     textLength: text.length,
-    variant,
+    requestedVariant: variant,
+    variant: effectiveVariant,
     totalWords: totalWordCount,
     translatedWords: translatedWordCount,
     unknownWords: unknownWords.length,
@@ -179,6 +190,7 @@ export async function translate(text: string, variant: Variant, options: Transla
   return {
     libran,
     confidence,
-    wordCount: totalWordCount
+    wordCount: totalWordCount,
+    variant: effectiveVariant
   };
 }

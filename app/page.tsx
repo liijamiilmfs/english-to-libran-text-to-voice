@@ -19,7 +19,7 @@ import type { Phrase } from '../lib/types/phrase'
 
 export default function Home() {
   const [inputText, setInputText] = useState('')
-  const [variant, setVariant] = useState<'ancient' | 'modern'>('ancient')       
+  const [variant, setVariant] = useState<'ancient' | 'modern'>('modern')
   const [libranText, setLibranText] = useState('')
   const [selectedVoice, setSelectedVoice] = useState<VoiceProfile | null>(null) 
   const [selectedVoiceFilter, setSelectedVoiceFilter] = useState<VoiceFilter | null>(null)                                                                      
@@ -32,6 +32,7 @@ export default function Home() {
   const [translationData, setTranslationData] = useState<{
     confidence?: number
     wordCount?: number
+    requestedVariant?: 'ancient' | 'modern'
   }>({})
   const [showVoiceSelector, setShowVoiceSelector] = useState(false)
   const [ttsProviderInfo, setTtsProviderInfo] = useState<{
@@ -40,7 +41,7 @@ export default function Home() {
     fallback: boolean
   } | null>(null)
 
-  const handleTranslation = (translatedText: string, selectedVariant: 'ancient' | 'modern', originalText: string, translationData?: { confidence?: number, wordCount?: number }) => {                                                           
+  const handleTranslation = (translatedText: string, selectedVariant: 'ancient' | 'modern', originalText: string, translationData?: { confidence?: number, wordCount?: number, requestedVariant?: 'ancient' | 'modern' }) => {
     setLibranText(translatedText)
     setVariant(selectedVariant)
     setInputText(originalText)
@@ -55,8 +56,9 @@ export default function Home() {
     setInputText(phrase.english)
     setVariant(selectedVariant)
     setTranslationData({
-      confidence: 1.0, // Phrases are pre-translated, so 100% confidence        
-      wordCount: phrase.english.split(' ').length
+      confidence: 1.0, // Phrases are pre-translated, so 100% confidence
+      wordCount: phrase.english.split(' ').length,
+      requestedVariant: selectedVariant
     })
   }
 
@@ -250,6 +252,7 @@ export default function Home() {
                 originalText={inputText}
                 confidence={translationData.confidence}
                 wordCount={translationData.wordCount}
+                requestedVariant={translationData.requestedVariant}
                 isTranslating={isTranslating}
               />
 

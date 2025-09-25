@@ -16,7 +16,7 @@ async function handleTranslateRequest(request: NextRequest) {
   log.apiRequest('POST', '/api/translate', requestId)
 
   try {
-    const { text, variant = 'ancient' } = await request.json()
+    const { text, variant = 'modern' } = await request.json()
 
     if (!text || typeof text !== 'string') {
       const errorResponse = createErrorResponse(ErrorCode.VALIDATION_MISSING_TEXT, { requestId })
@@ -41,6 +41,10 @@ async function handleTranslateRequest(request: NextRequest) {
 
     // Translate the text
     const result = await translate(text, variant as Variant)
+    const effectiveVariant = result.variant
+    if (variant !== effectiveVariant) {
+      log.warn('Variant fallback applied', { requestedVariant: variant, effectiveVariant, requestId })
+    }
     success = true
     confidence = result.confidence
     
@@ -59,23 +63,24 @@ async function handleTranslateRequest(request: NextRequest) {
         !translatedWords.some(tWord => tWord.includes(word) || word.includes(tWord))
       )
       unknownWords.forEach(word => {
-        log.unknownToken(word, variant, requestId)
+        log.unknownToken(word, effectiveVariant, requestId)
       })
     }
 
     // Log translation completion
-    log.translation(text, variant, result.libran, confidence, requestId, {
+    log.translation(text, effectiveVariant, result.libran, confidence, requestId, {
       unknownWords: unknownTokens,
       wordCount: result.wordCount
     })
 
     // Record translation metrics
-    metrics.recordTranslation(variant as 'ancient' | 'modern', confidence, unknownTokens)
+    metrics.recordTranslation(effectiveVariant, confidence, unknownTokens)
 
     return NextResponse.json({
       libran: result.libran,
       originalText: text,
-      variant: variant,
+      variant: effectiveVariant,
+      requestedVariant: variant,
       confidence: result.confidence,
       wordCount: result.wordCount
     })

@@ -10,17 +10,21 @@ interface TranslationResultProps {
   confidence?: number
   wordCount?: number
   isTranslating?: boolean
+  requestedVariant?: 'ancient' | 'modern'
 }
 
-export default function TranslationResult({ 
-  libranText, 
-  variant, 
-  originalText, 
-  confidence, 
+export default function TranslationResult({
+  libranText,
+  variant,
+  originalText,
+  confidence,
   wordCount,
-  isTranslating = false
+  isTranslating = false,
+  requestedVariant
 }: TranslationResultProps) {
   const [copied, setCopied] = useState(false)
+
+  const showFallbackNotice = requestedVariant && requestedVariant !== variant
 
   const handleCopy = async () => {
     try {
@@ -89,6 +93,12 @@ export default function TranslationResult({
             {libranText}
           </div>
         </div>
+
+        {showFallbackNotice && (
+          <div className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-md px-3 py-2">
+            Ancient Librán is temporarily served by the modern dictionary. Results reflect the modern variant.
+          </div>
+        )}
 
         {originalText && (
           <div className="text-sm text-gray-400">

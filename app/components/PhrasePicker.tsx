@@ -14,6 +14,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const isAncientDisabled = true
 
   useEffect(() => {
     loadPhrases()
@@ -133,8 +134,16 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
               
               <div className="flex space-x-2">
                 <button
-                  onClick={() => onPhraseSelect(phrase, 'ancient')}
-                  className="flex-1 px-2 py-1 bg-libran-gold/20 border border-libran-gold/30 rounded text-xs text-libran-gold hover:bg-libran-gold/30 transition-colors"
+                  onClick={() => {
+                    if (isAncientDisabled) return
+                    onPhraseSelect(phrase, 'ancient')
+                  }}
+                  disabled={isAncientDisabled}
+                  className={`flex-1 px-2 py-1 border rounded text-xs transition-colors ${
+                    isAncientDisabled
+                      ? 'bg-libran-gold/10 border-libran-gold/20 text-libran-gold/50 cursor-not-allowed'
+                      : 'bg-libran-gold/20 border-libran-gold/30 text-libran-gold hover:bg-libran-gold/30'
+                  }`}
                 >
                   Ancient: {phrase.ancient}
                 </button>
@@ -160,6 +169,12 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
           <p className="text-sm text-gray-400">No phrases found</p>
           <p className="text-xs text-gray-500 mt-1">Try adjusting your search or filter</p>
         </div>
+      )}
+
+      {isAncientDisabled && (
+        <p className="text-xs text-gray-500">
+          Ancient phrase presets are temporarily disabled while we focus on the modern Librán library.
+        </p>
       )}
     </div>
   )

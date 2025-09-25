@@ -4,14 +4,20 @@ import React, { useState } from 'react'
 import { Send, Loader2 } from 'lucide-react'
 
 interface TranslationFormProps {
-  onTranslation: (translatedText: string, variant: 'ancient' | 'modern', originalText: string, translationData?: { confidence?: number, wordCount?: number }) => void
+  onTranslation: (
+    translatedText: string,
+    variant: 'ancient' | 'modern',
+    originalText: string,
+    translationData?: { confidence?: number, wordCount?: number, requestedVariant?: 'ancient' | 'modern' }
+  ) => void
   onLoadingChange: (loading: boolean) => void
 }
 
 export default function TranslationForm({ onTranslation, onLoadingChange }: TranslationFormProps) {
   const [inputText, setInputText] = useState('')
-  const [variant, setVariant] = useState<'ancient' | 'modern'>('ancient')
+  const [variant, setVariant] = useState<'ancient' | 'modern'>('modern')
   const [isLoading, setIsLoading] = useState(false)
+  const isAncientDisabled = true
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,9 +36,12 @@ export default function TranslationForm({ onTranslation, onLoadingChange }: Tran
       if (!response.ok) throw new Error('Translation failed')
       
       const data = await response.json()
-      onTranslation(data.libran, variant, inputText, {
+      const effectiveVariant = (data.variant ?? variant) as 'ancient' | 'modern'
+      setVariant(effectiveVariant)
+      onTranslation(data.libran, effectiveVariant, inputText, {
         confidence: data.confidence,
-        wordCount: data.wordCount
+        wordCount: data.wordCount,
+        requestedVariant: (data.requestedVariant ?? variant) as 'ancient' | 'modern'
       })
     } catch (error) {
       console.error('Translation error:', error)
@@ -64,16 +73,19 @@ export default function TranslationForm({ onTranslation, onLoadingChange }: Tran
           Translation Variant
         </label>
         <div className="flex space-x-4">
-          <label className="flex items-center">
+          <label className={`flex items-center ${isAncientDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
             <input
               type="radio"
               value="ancient"
               checked={variant === 'ancient'}
-              onChange={(e) => setVariant(e.target.value as 'ancient' | 'modern')}
+              onChange={(e) => {
+                if (isAncientDisabled) return
+                setVariant(e.target.value as 'ancient' | 'modern')
+              }}
               className="mr-2 text-libran-gold focus:ring-libran-gold"
-              disabled={isLoading}
+              disabled={isLoading || isAncientDisabled}
             />
-            <span className="text-sm text-gray-300">Ancient Librán</span>
+            <span className="text-sm text-gray-300">Ancient Librán (coming soon)</span>
           </label>
           <label className="flex items-center">
             <input
@@ -88,6 +100,12 @@ export default function TranslationForm({ onTranslation, onLoadingChange }: Tran
           </label>
         </div>
       </div>
+
+      {isAncientDisabled && (
+        <p className="text-xs text-gray-500">
+          Ancient Librán is temporarily unavailable while we stabilise the modern dictionary.
+        </p>
+      )}
 
       <button
         type="submit"
