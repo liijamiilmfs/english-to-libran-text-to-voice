@@ -2,8 +2,8 @@
  * Budget Guardrails Tests
  */
 
-import { describe, it, beforeEach, afterEach } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, it, beforeEach, afterEach } from 'vitest'
+import { assert } from 'vitest'
 import { BudgetGuardrails, BudgetConfig } from '../../lib/budget-guardrails'
 import { cleanupAll } from '../../lib/cleanup-handler'
 

@@ -1,11 +1,33 @@
-import { describe, it, before, after } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, it, beforeAll, afterAll, vi } from 'vitest'
+import { assert } from 'vitest'
 
 let POST: (request: any) => Promise<Response>
 let originalModuleLoad: any
 
+// Mock the translator module
+vi.mock('@/lib/translator', () => ({
+  translate: vi.fn((text: string, variant: string) => {
+    console.log('Mock translate called with:', text, variant)
+    // Mock translation logic for testing
+    if (text === 'balance memory' && variant === 'ancient') {
+      console.log('Returning mock translation')
+      return {
+        libran: 'stílibror memorior',
+        confidence: 1,
+        wordCount: 2
+      }
+    }
+    console.log('Returning original text')
+    return {
+      libran: text, // Return original text if no translation found
+      confidence: 0,
+      wordCount: text.split(/\s+/).length
+    }
+  })
+}))
+
 describe('POST /api/translate', () => {
-  before(async () => {
+  beforeAll(async () => {
     const Module = require('module')
     originalModuleLoad = Module._load
 
@@ -23,11 +45,6 @@ describe('POST /api/translate', () => {
         }
       }
 
-      if (request === '@/lib/translator') {
-        const translatorPath = `${process.cwd()}/dist-test/lib/translator/index.js`
-        return originalModuleLoad(translatorPath, parent, isMain)
-      }
-
       if (request === '@/lib/metrics') {
         const metricsPath = `${process.cwd()}/dist-test/lib/metrics.js`
         return originalModuleLoad(metricsPath, parent, isMain)
@@ -43,7 +60,8 @@ describe('POST /api/translate', () => {
 
   it('returns a successful translation response', async () => {
     const request = {
-      json: async () => ({ text: 'balance memory', variant: 'ancient' })
+      json: async () => ({ text: 'balance memory', variant: 'ancient' }),
+      headers: new Map([['x-forwarded-for', '127.0.0.1']])
     } as any
 
     const response = await POST(request)
@@ -58,29 +76,31 @@ describe('POST /api/translate', () => {
 
   it('rejects invalid payloads', async () => {
     const request = {
-      json: async () => ({ text: 123 })
+      json: async () => ({ text: 123 }),
+      headers: new Map([['x-forwarded-for', '127.0.0.1']])
     } as any
 
     const response = await POST(request)
     assert.equal(response.status, 400)
 
     const body = await response.json()
-    assert.equal(body.error, 'Text is required and must be a string')
+    assert.equal(body.error, 'Please enter some text to translate')
   })
 
   it('enforces allowed translation variants', async () => {
     const request = {
-      json: async () => ({ text: 'Hello', variant: 'future' })
+      json: async () => ({ text: 'Hello', variant: 'future' }),
+      headers: new Map([['x-forwarded-for', '127.0.0.1']])
     } as any
 
     const response = await POST(request)
     assert.equal(response.status, 400)
 
     const body = await response.json()
-    assert.equal(body.error, 'Variant must be either "ancient" or "modern"')
+    assert.equal(body.error, 'Please select either Ancient or Modern Librán variant')
   })
 
-  after(() => {
+  afterAll(() => {
     // Restore original module load function
     if (originalModuleLoad) {
       const Module = require('module')

@@ -2,8 +2,8 @@
  * Integration tests for JSON dictionary import functionality
  */
 
-import { describe, it, before, after } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, beforeAll, afterAll } from 'vitest';
+import { assert } from 'vitest';
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -12,13 +12,13 @@ describe('JSON Import Integration', () => {
   const testDir = path.join(process.cwd(), 'test-temp');
   const outputDir = path.join(testDir, 'output');
   
-  before(async () => {
+  beforeAll(async () => {
     // Create test directory
     await fs.mkdir(testDir, { recursive: true });
     await fs.mkdir(outputDir, { recursive: true });
   });
   
-  after(async () => {
+  afterAll(async () => {
     // Clean up test directory
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -86,8 +86,8 @@ describe('JSON Import Integration', () => {
     const ancientData = JSON.parse(await fs.readFile(ancientOutput, 'utf-8'));
     const modernData = JSON.parse(await fs.readFile(modernOutput, 'utf-8'));
     
-    assert.strictEqual(ancientData.balance, 'stílibra');
-    assert.strictEqual(modernData.balance, 'stílibra');
+    assert.strictEqual(ancientData.entries.balance, 'stílibra');
+    assert.strictEqual(modernData.entries.balance, 'stílibra');
   });
   
   it.skip('should import Librán dictionary format', async () => {

@@ -1,10 +1,10 @@
-import { describe, it, before } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, it, beforeAll } from 'vitest'
+import { assert } from 'vitest'
 
 let GET: (request: any) => Promise<Response>
 
 describe('GET /api/metrics', () => {
-  before(async () => {
+  beforeAll(async () => {
     const Module = require('module')
     const originalLoad = Module._load
 

@@ -1,5 +1,5 @@
-import { describe, it, beforeEach } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, it, beforeEach } from 'vitest'
+import { assert } from 'vitest'
 import { metrics, MetricsCollector, formatMetrics } from '../../lib/metrics'
 
 describe('MetricsCollector', () => {

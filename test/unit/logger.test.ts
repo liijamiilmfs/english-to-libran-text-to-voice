@@ -1,5 +1,5 @@
-import { describe, it, beforeEach, afterEach } from 'node:test'
-import { strict as assert } from 'node:assert'
+import { describe, it, beforeEach, afterEach } from 'vitest'
+import { assert } from 'vitest'
 import { log, generateCorrelationId, LogEvents } from '../../lib/logger'
 import * as fs from 'fs'
 import * as path from 'path'

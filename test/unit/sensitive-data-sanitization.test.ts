@@ -1,6 +1,6 @@
-import { describe, it } from 'node:test'
-import assert from 'node:assert'
-import { log } from '../../lib/logger'
+import { describe, it } from 'vitest'
+import { assert } from 'vitest'
+import { log, sanitizeLogData } from '../../lib/logger'
 
 describe('Sensitive Data Sanitization', () => {
   it('should redact all sensitive keys, not just the first one', () => {
@@ -19,7 +19,6 @@ describe('Sensitive Data Sanitization', () => {
     }
 
     // Test the sanitizeLogData function directly
-    const { sanitizeLogData } = require('../../lib/logger')
     const sanitized = sanitizeLogData(testData)
     
     // Verify all sensitive keys are redacted
@@ -41,7 +40,6 @@ describe('Sensitive Data Sanitization', () => {
     }
 
     // Test the sanitizeLogData function directly
-    const { sanitizeLogData } = require('../../lib/logger')
     const sanitized = sanitizeLogData(testData)
     
     // Verify sensitive data in values is redacted
@@ -60,7 +58,6 @@ describe('Sensitive Data Sanitization', () => {
     }
 
     // Test the sanitizeLogData function directly
-    const { sanitizeLogData } = require('../../lib/logger')
     const sanitized = sanitizeLogData(testData)
     
     // Verify sensitive keys are redacted
