@@ -13,6 +13,14 @@ describe('GET /api/metrics', () => {
         return {
           NextRequest: class {
             constructor(public url: string) {}
+            headers = {
+              get: (key: string) => {
+                const headers: Record<string, string> = {
+                  'x-api-secret': 'dev-api-secret-change-in-production'
+                }
+                return headers[key] || null
+              }
+            }
           },
           NextResponse: class extends Response {
             static json(data: any, init?: { status?: number }) {
@@ -39,9 +47,7 @@ describe('GET /api/metrics', () => {
   })
 
   it('returns metrics in JSON format by default', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics'
-    } as any
+    const request = new (require('next/server').NextRequest)('http://localhost:3000/api/metrics')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -56,9 +62,7 @@ describe('GET /api/metrics', () => {
   })
 
   it('returns metrics in Prometheus format', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics?format=prometheus'
-    } as any
+    const request = new (require('next/server').NextRequest)('http://localhost:3000/api/metrics?format=prometheus')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -72,9 +76,7 @@ describe('GET /api/metrics', () => {
   })
 
   it('returns metrics in text format', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics?format=text'
-    } as any
+    const request = new (require('next/server').NextRequest)('http://localhost:3000/api/metrics?format=text')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -87,9 +89,7 @@ describe('GET /api/metrics', () => {
   })
 
   it('rejects invalid format parameter', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics?format=invalid'
-    } as any
+    const request = new (require('next/server').NextRequest)('http://localhost:3000/api/metrics?format=invalid')
 
     const response = await GET(request)
     assert.equal(response.status, 400)
@@ -99,9 +99,7 @@ describe('GET /api/metrics', () => {
   })
 
   it('sets appropriate cache headers', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics'
-    } as any
+    const request = new (require('next/server').NextRequest)('http://localhost:3000/api/metrics')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -113,9 +111,7 @@ describe('GET /api/metrics', () => {
   it('handles errors gracefully', async () => {
     // This test would require mocking the metrics module to throw an error
     // For now, we'll just verify the endpoint exists and responds
-    const request = {
-      url: 'http://localhost:3000/api/metrics'
-    } as any
+    const request = new (require('next/server').NextRequest)('http://localhost:3000/api/metrics')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
