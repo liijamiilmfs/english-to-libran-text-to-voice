@@ -57,11 +57,17 @@ export enum ErrorCode {
   VALIDATION_INVALID_FORMAT = 'VALIDATION_INVALID_FORMAT',
   VALIDATION_TEXT_TOO_LONG = 'VALIDATION_TEXT_TOO_LONG',
   VALIDATION_EMPTY_INPUT = 'VALIDATION_EMPTY_INPUT',
+  VALIDATION_INVALID_OPERATION = 'VALIDATION_INVALID_OPERATION',
+  VALIDATION_MISSING_ENTRIES = 'VALIDATION_MISSING_ENTRIES',
+  VALIDATION_MISSING_CATEGORY = 'VALIDATION_MISSING_CATEGORY',
+  VALIDATION_MISSING_UPDATES = 'VALIDATION_MISSING_UPDATES',
   
   // Translation Errors (5xx)
   TRANSLATION_FAILED = 'TRANSLATION_FAILED',
   TRANSLATION_DICTIONARY_LOAD = 'TRANSLATION_DICTIONARY_LOAD',
   TRANSLATION_TOKENIZATION = 'TRANSLATION_TOKENIZATION',
+  DICTIONARY_BULK_OPERATION_FAILED = 'DICTIONARY_BULK_OPERATION_FAILED',
+  DICTIONARY_LOAD_FAILED = 'DICTIONARY_LOAD_FAILED',
   
   // TTS Errors (5xx)
   TTS_GENERATION_FAILED = 'TTS_GENERATION_FAILED',
@@ -155,6 +161,38 @@ const ERROR_DEFINITIONS: Record<ErrorCode, Omit<ErrorDetails, 'context'>> = {
     severity: ErrorSeverity.LOW,
     retryable: false
   },
+  [ErrorCode.VALIDATION_INVALID_OPERATION]: {
+    code: ErrorCode.VALIDATION_INVALID_OPERATION,
+    message: 'Invalid operation specified',
+    userMessage: 'Please specify a valid operation (addCategory or updateProperties)',
+    category: ErrorCategory.VALIDATION,
+    severity: ErrorSeverity.LOW,
+    retryable: false
+  },
+  [ErrorCode.VALIDATION_MISSING_ENTRIES]: {
+    code: ErrorCode.VALIDATION_MISSING_ENTRIES,
+    message: 'Entries array is required and must not be empty',
+    userMessage: 'Please provide at least one entry to modify',
+    category: ErrorCategory.VALIDATION,
+    severity: ErrorSeverity.LOW,
+    retryable: false
+  },
+  [ErrorCode.VALIDATION_MISSING_CATEGORY]: {
+    code: ErrorCode.VALIDATION_MISSING_CATEGORY,
+    message: 'Category is required for addCategory operation',
+    userMessage: 'Please specify a category name',
+    category: ErrorCategory.VALIDATION,
+    severity: ErrorSeverity.LOW,
+    retryable: false
+  },
+  [ErrorCode.VALIDATION_MISSING_UPDATES]: {
+    code: ErrorCode.VALIDATION_MISSING_UPDATES,
+    message: 'Updates object is required for updateProperties operation',
+    userMessage: 'Please provide the properties to update',
+    category: ErrorCategory.VALIDATION,
+    severity: ErrorSeverity.LOW,
+    retryable: false
+  },
 
   // Translation Errors
   [ErrorCode.TRANSLATION_FAILED]: {
@@ -179,6 +217,22 @@ const ERROR_DEFINITIONS: Record<ErrorCode, Omit<ErrorDetails, 'context'>> = {
     userMessage: 'Unable to process the text. Please check your input and try again',
     category: ErrorCategory.TRANSLATION,
     severity: ErrorSeverity.MEDIUM,
+    retryable: true
+  },
+  [ErrorCode.DICTIONARY_BULK_OPERATION_FAILED]: {
+    code: ErrorCode.DICTIONARY_BULK_OPERATION_FAILED,
+    message: 'Dictionary bulk operation failed',
+    userMessage: 'Failed to update dictionary entries. Please try again or contact support',
+    category: ErrorCategory.TRANSLATION,
+    severity: ErrorSeverity.HIGH,
+    retryable: true
+  },
+  [ErrorCode.DICTIONARY_LOAD_FAILED]: {
+    code: ErrorCode.DICTIONARY_LOAD_FAILED,
+    message: 'Failed to load dictionary data',
+    userMessage: 'Dictionary service is temporarily unavailable. Please try again later',
+    category: ErrorCategory.TRANSLATION,
+    severity: ErrorSeverity.HIGH,
     retryable: true
   },
 
