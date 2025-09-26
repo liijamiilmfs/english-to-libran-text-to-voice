@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Home, ArrowLeft, ChefHat, Fish } from 'lucide-react'
+import { Home, ArrowLeft, BookOpen, Scroll, Eye, Search, Sparkles } from 'lucide-react'
 
 export default function NotFound() {
   const [mounted, setMounted] = useState(false)
@@ -17,7 +17,7 @@ export default function NotFound() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 flex items-center justify-center relative overflow-hidden">
-      {/* Background sushi particles */}
+      {/* Background mystical particles */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -38,27 +38,50 @@ export default function NotFound() {
               delay: i * 0.2,
             }}
           >
-            🍣
+            {['⚡', '🔮', '✨', '📜', '📚'][i % 5]}
           </motion.div>
         ))}
       </div>
 
       <div className="relative z-10 text-center px-8 max-w-4xl mx-auto">
-        {/* Bear Chef Animation */}
+        {/* Lost Archivist Video */}
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="mb-8"
+          className="mb-8 relative"
         >
-          <div className="text-8xl md:text-9xl mb-4">🐻</div>
-          <motion.div
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-4xl md:text-5xl"
-          >
-            👨‍🍳
-          </motion.div>
+          <div className="relative w-full max-w-2xl mx-auto">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto rounded-lg shadow-2xl border-2 border-libran-gold/30"
+              poster="/bear-archivist-404.mp4"
+            >
+              <source src="/bear-archivist-404.mp4" type="video/mp4" />
+              {/* Fallback for browsers that don't support video */}
+              <div className="flex items-center justify-center h-64 bg-slate-800 rounded-lg">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🧙‍♂️</div>
+                  <div className="text-2xl text-libran-gold">The Lost Archivist</div>
+                </div>
+              </div>
+            </video>
+            
+            {/* Overlay text on video */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2, duration: 1 }}
+              className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-4"
+            >
+              <div className="text-libran-gold font-bold text-lg" style={{ fontFamily: 'Cinzel, serif' }}>
+                "This is not the page you're looking for..."
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* 404 Text */}
@@ -66,13 +89,13 @@ export default function NotFound() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-6xl md:text-8xl font-black mb-6 text-stone-100"
+          className="text-6xl md:text-8xl font-black mb-6 text-libran-gold drop-shadow-lg"
           style={{ fontFamily: 'Cinzel, serif' }}
         >
           404
         </motion.h1>
 
-        {/* Fun Message */}
+        {/* Lost Archivist Message */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -80,63 +103,26 @@ export default function NotFound() {
           className="mb-8"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-stone-200 mb-4" style={{ fontFamily: 'Merriweather, serif' }}>
-            Oops! This page got eaten by a bear! 🐻
+            The Lost Archivist
           </h2>
           <p className="text-lg text-stone-300 max-w-2xl mx-auto leading-relaxed" style={{ fontFamily: 'Merriweather, serif' }}>
-            While our bear chef is busy making sushi, this page seems to have wandered off. 
-            Don&apos;t worry, it&apos;s probably just getting some fresh ingredients!
+            This is not the page you&apos;re looking for...
           </p>
         </motion.div>
 
-        {/* Sushi Making Animation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-          className="mb-8 flex justify-center items-center space-x-4"
-        >
-          <motion.div
-            animate={{ x: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-3xl"
-          >
-            🍚
-          </motion.div>
-          <motion.div
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-2xl"
-          >
-            ⚡
-          </motion.div>
-          <motion.div
-            animate={{ x: [0, -10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-            className="text-3xl"
-          >
-            🐟
-          </motion.div>
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1, repeat: Infinity, delay: 1 }}
-            className="text-3xl"
-          >
-            🍣
-          </motion.div>
-        </motion.div>
 
         {/* Action Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
+          transition={{ delay: 1.4, duration: 0.8 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => window.history.back()}
-            className="bg-gradient-to-r from-blue-600 to-blue-800 text-stone-100 font-bold py-3 px-6 rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-900 transition-all duration-300 flex items-center space-x-2"
+            className="bg-gradient-to-r from-slate-700 to-slate-800 text-stone-200 font-bold py-3 px-6 rounded-lg shadow-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 flex items-center space-x-2"
             style={{ fontFamily: 'Cinzel, serif' }}
           >
             <ArrowLeft size={20} />
@@ -147,23 +133,23 @@ export default function NotFound() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => window.location.href = '/'}
-            className="bg-gradient-to-r from-amber-600 to-amber-800 text-stone-100 font-bold py-3 px-6 rounded-lg shadow-lg hover:from-amber-700 hover:to-amber-900 transition-all duration-300 flex items-center space-x-2"
+            className="bg-gradient-to-r from-libran-gold to-amber-600 text-slate-900 font-bold py-3 px-6 rounded-lg shadow-lg hover:from-amber-600 hover:to-libran-gold transition-all duration-300 flex items-center space-x-2"
             style={{ fontFamily: 'Cinzel, serif' }}
           >
             <Home size={20} />
-            <span>Return Home</span>
+            <span>Return to the Forge</span>
           </motion.button>
         </motion.div>
 
-        {/* Fun Footer */}
+        {/* Mystical Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
+          transition={{ delay: 1.6, duration: 1 }}
           className="mt-12 text-stone-400 text-sm"
           style={{ fontFamily: 'Merriweather, serif' }}
         >
-          <p>🐻 &quot;This page is being prepared with love and fresh ingredients!&quot; 🍣</p>
+          <p>🧙‍♂️ &quot;The ancient scrolls speak of many paths, but this one seems to have vanished into the mists of time...&quot;</p>
         </motion.div>
       </div>
     </div>
