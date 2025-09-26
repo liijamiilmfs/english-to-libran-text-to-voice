@@ -11,7 +11,7 @@ export default function SignIn() {
 
   useEffect(() => {
     // Check if user is already signed in
-    getSession().then((session) => {
+    getSession().then((session: unknown) => {
       if (session) {
         router.push('/')
       }
