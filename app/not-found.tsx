@@ -78,7 +78,7 @@ export default function NotFound() {
               className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-4"
             >
               <div className="text-libran-gold font-bold text-lg" style={{ fontFamily: 'Cinzel, serif' }}>
-                "This is not the page you're looking for..."
+                &quot;This is not the page you&apos;re looking for...&quot;
               </div>
             </motion.div>
           </div>
