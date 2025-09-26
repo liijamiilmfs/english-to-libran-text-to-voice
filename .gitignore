@@ -184,6 +184,7 @@ scripts/gpt_runner_milestones*.ps1
 # Cleanup additions
 audit-reports/
 *.log
+<<<<<<< HEAD
 *.tmp
 *.temp
 .DS_Store
@@ -191,3 +192,58 @@ Thumbs.db
 
 # GPT Runner scripts (external project)
 scripts/gpt_runner_*.ps1
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Test results
+test-results/
+playwright-report/
+test-results.xml
+
+# Security scan results
+security-reports/
+*.sarif
+trivy-results.sarif
+snyk.sarif
+
+# License reports
+license-report.json
+
+# Local configuration files
+config.local.json
+settings.local.json
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Personal protection rules (if any)
+protection-rules/
+personal-config/
+user-settings/
+
+# Local development files
+.local/
+local/
+
+# Build Logs
+docs/build_logs/
+
+# System files
+.DS_Store
+Thumbs.db
