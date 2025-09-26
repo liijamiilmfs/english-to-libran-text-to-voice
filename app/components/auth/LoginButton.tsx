@@ -1,8 +1,9 @@
 'use client'
 
+import { trackAuth, trackUserInteraction, trackError } from '@/lib/analytics'
 import { signIn, signOut, useSession } from 'next-auth/react'
-import { useState } from 'react'
 import Image from 'next/image'
+import { useState } from 'react'
 
 interface LoginButtonProps {
   className?: string
@@ -16,9 +17,12 @@ export default function LoginButton({ className = '', showUserInfo = false }: Lo
   const handleSignIn = async () => {
     try {
       setIsLoading(true)
+      trackUserInteraction('click', 'sign_in_button', { provider: 'github' })
       await signIn('github', { callbackUrl: '/' })
+      trackAuth('sign_in', 'github')
     } catch (error) {
       console.error('Sign in error:', error)
+      trackError('sign_in_failed', error instanceof Error ? error.message : 'Unknown error', { provider: 'github' })
     } finally {
       setIsLoading(false)
     }
@@ -27,9 +31,12 @@ export default function LoginButton({ className = '', showUserInfo = false }: Lo
   const handleSignOut = async () => {
     try {
       setIsLoading(true)
+      trackUserInteraction('click', 'sign_out_button')
       await signOut({ callbackUrl: '/' })
+      trackAuth('sign_out')
     } catch (error) {
       console.error('Sign out error:', error)
+      trackError('sign_out_failed', error instanceof Error ? error.message : 'Unknown error')
     } finally {
       setIsLoading(false)
     }

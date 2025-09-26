@@ -1,7 +1,8 @@
 'use client'
 
+import { trackFeatureUsage, trackUserInteraction } from '@/lib/analytics'
+import { BookOpen, RefreshCw, Send } from 'lucide-react'
 import { useState } from 'react'
-import { Send, BookOpen, RefreshCw } from 'lucide-react'
 
 // Client-side logging utility
 const log = {
@@ -25,10 +26,18 @@ export default function TranslationForm({ onTranslation, onLoadingChange }: Tran
     e.preventDefault()
     if (!inputText.trim()) {
       log.warn('Attempted to translate empty text')
+      trackUserInteraction('form_submit', 'translation_form', {
+        success: false,
+        reason: 'empty_text'
+      })
       return
     }
 
     log.info('Starting translation', { textLength: inputText.length, variant })
+    trackFeatureUsage('translation', 'start', {
+      text_length: inputText.length,
+      variant
+    })
     setIsTranslating(true)
     onLoadingChange(true)
 
@@ -50,8 +59,8 @@ export default function TranslationForm({ onTranslation, onLoadingChange }: Tran
       }
 
       const data = await response.json()
-      log.info('Translation completed', { 
-        originalLength: inputText.length, 
+      log.info('Translation completed', {
+        originalLength: inputText.length,
         translatedLength: data.libran.length,
         confidence: data.confidence,
         wordCount: data.wordCount
