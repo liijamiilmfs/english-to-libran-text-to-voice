@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import LoginButton from './components/auth/LoginButton'
 
 export default function Home() {
   console.log('Home page rendering!')
@@ -17,6 +18,21 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative overflow-hidden">
+      {/* Login button in top right */}
+      <div className="absolute top-4 right-4 z-10">
+        <LoginButton showUserInfo={true} />
+      </div>
+      
+      {/* Profile link */}
+      <div className="absolute top-4 left-4 z-10">
+        <a
+          href="/profile"
+          className="text-white hover:text-gray-300 font-medium"
+        >
+          Profile
+        </a>
+      </div>
+      
       {/* Ominous background effects */}
       <div className="absolute inset-0 bg-black/20"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent"></div>

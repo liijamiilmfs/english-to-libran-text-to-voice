@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/react'
+import AuthProvider from './providers/session-provider'
 
 export const metadata: Metadata = {
   title: 'Librán Voice Forge',
@@ -30,8 +31,10 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
-        <Analytics />
+        <AuthProvider>
+          {children}
+          <Analytics />
+        </AuthProvider>
       </body>
     </html>
   )
