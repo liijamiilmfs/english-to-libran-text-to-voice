@@ -1,0 +1,78 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          GITHUB_ID: ${{ secrets.GITHUB_ID }}
+          GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          API_SECRET: ${{ secrets.API_SECRET }}
+          
+      - name: Check coverage thresholds
+        run: npm run coverage:check
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            
+            const comment = `## 📊 Test Coverage Report
+            
+            | Metric | Coverage | Threshold | Status |
+            |--------|----------|-----------|--------|
+            | Statements | ${coverage.total.statements.pct}% | 90% | ${coverage.total.statements.pct >= 90 ? '✅' : '❌'} |
+            | Branches | ${coverage.total.branches.pct}% | 85% | ${coverage.total.branches.pct >= 85 ? '✅' : '❌'} |
+            | Functions | ${coverage.total.functions.pct}% | 90% | ${coverage.total.functions.pct >= 90 ? '✅' : '❌'} |
+            | Lines | ${coverage.total.lines.pct}% | 90% | ${coverage.total.lines.pct >= 90 ? '✅' : '❌'} |
+            
+            **Overall Coverage: ${coverage.total.lines.pct}%**
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
