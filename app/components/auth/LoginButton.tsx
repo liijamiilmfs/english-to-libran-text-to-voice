@@ -2,6 +2,7 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
+import Image from 'next/image'
 
 interface LoginButtonProps {
   className?: string
@@ -49,9 +50,11 @@ export default function LoginButton({ className = '', showUserInfo = false }: Lo
         {showUserInfo && session.user && (
           <div className="flex items-center space-x-2">
             {session.user.image && (
-              <img
+              <Image
                 src={session.user.image}
                 alt={session.user.name || 'User'}
+                width={32}
+                height={32}
                 className="h-8 w-8 rounded-full"
               />
             )}

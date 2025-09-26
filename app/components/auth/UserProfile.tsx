@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import LoginButton from './LoginButton'
 
 interface UserPreferences {
@@ -90,9 +91,11 @@ export default function UserProfile() {
     <div className="bg-white rounded-lg shadow-md p-6 max-w-md">
       <div className="flex items-center space-x-4 mb-4">
         {session.user?.image && (
-          <img
+          <Image
             src={session.user.image}
             alt={session.user.name || 'User'}
+            width={48}
+            height={48}
             className="h-12 w-12 rounded-full"
           />
         )}

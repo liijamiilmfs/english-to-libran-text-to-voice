@@ -2,6 +2,26 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/react'
 import AuthProvider from './providers/session-provider'
+import { Cinzel, Crimson_Text, Merriweather } from 'next/font/google'
+
+const cinzel = Cinzel({ 
+  subsets: ['latin'],
+  variable: '--font-cinzel',
+  weight: ['400', '500', '600', '700', '800', '900']
+})
+
+const crimsonText = Crimson_Text({ 
+  subsets: ['latin'],
+  variable: '--font-crimson-text',
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic']
+})
+
+const merriweather = Merriweather({ 
+  subsets: ['latin'],
+  variable: '--font-merriweather',
+  weight: ['300', '400', '700', '900']
+})
 
 export const metadata: Metadata = {
   title: 'Librán Voice Forge',
@@ -21,15 +41,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Uncial+Antiqua&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Merriweather:wght@300;400;700;900&display=swap" 
-          rel="stylesheet" 
-        />
-      </head>
+    <html lang="en" className={`${cinzel.variable} ${crimsonText.variable} ${merriweather.variable}`}>
       <body>
         <AuthProvider>
           {children}
