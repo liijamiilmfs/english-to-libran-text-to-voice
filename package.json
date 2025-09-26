@@ -47,6 +47,11 @@
     "release:full:patch": "node scripts/release.js patch",
     "release:full:minor": "node scripts/release.js minor",
     "release:full:major": "node scripts/release.js major",
+    "dev:https": "next dev --experimental-https --experimental-https-key ./certs/localhost-key.pem --experimental-https-cert ./certs/localhost.pem",
+    "dev:https:port": "next dev --experimental-https --experimental-https-key ./certs/localhost-key.pem --experimental-https-cert ./certs/localhost.pem -p 3001",
+    "setup:https": "node scripts/setup-dev-https.js",
+    "security:audit": "node scripts/security-audit.js",
+    "security:test": "npm run test:vitest:run -- test/integration/security-headers.test.ts",
     "prepare": "husky"
   },
   "dependencies": {
