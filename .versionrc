@@ -12,8 +12,8 @@
       "section": "Performance Improvements",
       "hidden": false
     },
-    "refactor": {
-      "section": "Code Refactoring",
+    "revert": {
+      "section": "Reverts",
       "hidden": false
     },
     "docs": {
@@ -22,7 +22,15 @@
     },
     "style": {
       "section": "Styles",
-      "hidden": true
+      "hidden": false
+    },
+    "chore": {
+      "section": "Miscellaneous Chores",
+      "hidden": false
+    },
+    "refactor": {
+      "section": "Code Refactoring",
+      "hidden": false
     },
     "test": {
       "section": "Tests",
@@ -35,28 +43,16 @@
     "ci": {
       "section": "Continuous Integration",
       "hidden": false
-    },
-    "chore": {
-      "section": "Chores",
-      "hidden": true
-    },
-    "revert": {
-      "section": "Reverts",
-      "hidden": false
     }
   },
-  "commitUrlFormat": "{{host}}/{{owner}}/{{repository}}/commit/{{hash}}",
-  "compareUrlFormat": "{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}",
-  "issueUrlFormat": "{{host}}/{{owner}}/{{repository}}/issues/{{id}}",
-  "userUrlFormat": "{{host}}/{{user}}",
+  "commitUrlFormat": "https://github.com/liijamiilmfs/english-to-libran-text-to-voice/commit/{{hash}}",
+  "compareUrlFormat": "https://github.com/liijamiilmfs/english-to-libran-text-to-voice/compare/{{previousTag}}...{{currentTag}}",
+  "issueUrlFormat": "https://github.com/liijamiilmfs/english-to-libran-text-to-voice/issues/{{id}}",
+  "userUrlFormat": "https://github.com/{{user}}",
   "releaseCommitMessageFormat": "chore(release): {{currentTag}}",
   "bumpFiles": [
     {
       "filename": "package.json",
-      "type": "json"
-    },
-    {
-      "filename": "package-lock.json",
       "type": "json"
     }
   ],
@@ -65,5 +61,9 @@
       "filename": "package.json",
       "type": "json"
     }
-  ]
+  ],
+  "scripts": {
+    "precommit": "npm run lint && npm run type-check",
+    "prepush": "npm run test:all"
+  }
 }
