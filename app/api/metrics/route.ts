@@ -36,7 +36,8 @@ async function handleGet(request: NextRequest) {
     })
 
     const headers: Record<string, string> = {
-      'Content-Type': format === 'prometheus' ? 'text/plain; version=0.0.4; charset=utf-8' : 'application/json'
+      'Content-Type': format === 'prometheus' ? 'text/plain; version=0.0.4; charset=utf-8' : 
+                      format === 'text' ? 'text/plain; charset=utf-8' : 'application/json'
     }
 
     return new NextResponse(metrics, { 

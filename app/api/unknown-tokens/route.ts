@@ -74,7 +74,7 @@ async function handlePost(request: NextRequest) {
       token,
       variant,
       context: context || '',
-      userAgent: userAgent || request.headers.get('user-agent') || 'unknown',
+      userAgent: userAgent || request.headers?.get('user-agent') || 'unknown',
       sessionId: sessionId || 'unknown'
     });
     
