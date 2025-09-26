@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { log, generateCorrelationId } from '@/lib/logger'
+import { getToken } from 'next-auth/jwt'
 
 // Security configuration
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'dev-admin-secret-change-in-production'
@@ -151,6 +152,23 @@ function verifyApiAuth(request: NextRequest): boolean {
 }
 
 /**
+ * Check if user is authenticated via NextAuth
+ */
+async function verifyUserAuth(request: NextRequest): Promise<boolean> {
+  try {
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+    return !!token
+  } catch (error) {
+    log.error('Error verifying user authentication', {
+      event: 'USER_AUTH_ERROR',
+      corr_id: generateCorrelationId(),
+      ctx: { error: error instanceof Error ? error.message : 'Unknown error' }
+    })
+    return false
+  }
+}
+
+/**
  * Create unauthorized response
  */
 function createUnauthorizedResponse(message: string, request: NextRequest): NextResponse {
@@ -252,16 +270,22 @@ export function withUniversalSecurity(handler: (request: NextRequest) => Promise
       return handler(request)
     }
 
-    // Check API authentication
+    // Check API authentication (user auth or API secret)
     if (isApiRoute(pathname)) {
-      if (!verifyApiAuth(request)) {
-        return createUnauthorizedResponse('API access required', request)
+      const isUserAuthenticated = await verifyUserAuth(request)
+      const isApiSecretValid = verifyApiAuth(request)
+      
+      if (!isUserAuthenticated && !isApiSecretValid) {
+        return createUnauthorizedResponse('Authentication required', request)
       }
       
       log.debug('API route accessed', {
         event: 'API_ROUTE_ACCESS',
         corr_id: corrId,
-        ctx: { path: pathname }
+        ctx: { 
+          path: pathname,
+          authType: isUserAuthenticated ? 'user' : 'api_secret'
+        }
       })
       return handler(request)
     }
