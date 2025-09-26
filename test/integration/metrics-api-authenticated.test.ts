@@ -1,68 +1,47 @@
-import { describe, it, before } from 'node:test'
+import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
+import { createRequire } from 'module'
 
 let GET: (request: any) => Promise<Response>
 
-describe('GET /api/metrics - Authenticated Tests', () => {
-  before(async () => {
-    const Module = require('module')
-    const originalLoad = Module._load
+function createRequest(url: string, headers: Record<string, string> = {}) {
+  const headerBag = new Headers(headers)
 
-    Module._load = (request: string, parent: any, isMain: boolean) => {
-      if (request === 'next/server') {
-        return {
-          NextRequest: class {
-            constructor(public url: string) {}
-            headers = {
-              get: (key: string) => {
-                const headers: Record<string, string> = {
-                  'X-API-Secret': 'dev-api-secret-change-in-production',
-                  'user-agent': 'test-agent'
-                }
-                return headers[key] || null
-              }
-            }
-          },
-          NextResponse: class extends Response {
-            static json(data: any, init?: { status?: number }) {
-              return new Response(JSON.stringify(data), {
-                status: init?.status ?? 200,
-                headers: { 'content-type': 'application/json' }
-              })
-            }
-            static text(data: string, init?: { status?: number }) {
-              return new Response(data, {
-                status: init?.status ?? 200,
-                headers: { 'content-type': 'text/plain' }
-              })
-            }
-          }
-        }
-      }
-
-      if (request === '@/lib/metrics') {
-        const metricsPath = `${process.cwd()}/dist-test/lib/metrics.js`
-        return originalLoad(metricsPath, parent, isMain)
-      }
-
-      if (request === '@/lib/api-security') {
-        return {
-          withApiAuth: (handler: any) => handler // Bypass authentication in tests
-        }
-      }
-
-      return originalLoad(request, parent, isMain)
+  return {
+    url,
+    headers: {
+      get: (key: string) => headerBag.get(key) || null
     }
+  } as any
+}
 
+function setNodeEnv(value: string | undefined) {
+  Object.defineProperty(process.env, 'NODE_ENV', {
+    value,
+    enumerable: true,
+    configurable: true,
+    writable: true
+  })
+}
+
+describe('GET /api/metrics - Authenticated Tests', () => {
+  const originalNodeEnv = process.env.NODE_ENV
+  const requireForTests = createRequire(__filename)
+
+  before(async () => {
+    setNodeEnv('test')
+    const routePath = requireForTests.resolve('../../app/api/metrics/route')
+    delete requireForTests.cache[routePath]
     const route = await import('../../app/api/metrics/route')
     GET = route.GET
-    Module._load = originalLoad
+  })
+
+  after(() => {
+    setNodeEnv(originalNodeEnv)
   })
 
   it('returns metrics in JSON format by default', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics'
-    } as any
+    const request = createRequest('http://localhost:3000/api/metrics')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -76,9 +55,7 @@ describe('GET /api/metrics - Authenticated Tests', () => {
   })
 
   it('returns metrics in Prometheus format', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics?format=prometheus'
-    } as any
+    const request = createRequest('http://localhost:3000/api/metrics?format=prometheus')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -92,9 +69,7 @@ describe('GET /api/metrics - Authenticated Tests', () => {
   })
 
   it('returns metrics in text format', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics?format=text'
-    } as any
+    const request = createRequest('http://localhost:3000/api/metrics?format=text')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -107,9 +82,7 @@ describe('GET /api/metrics - Authenticated Tests', () => {
   })
 
   it('rejects invalid format parameter', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics?format=invalid'
-    } as any
+    const request = createRequest('http://localhost:3000/api/metrics?format=invalid')
 
     const response = await GET(request)
     assert.equal(response.status, 400)
@@ -119,9 +92,7 @@ describe('GET /api/metrics - Authenticated Tests', () => {
   })
 
   it('sets appropriate cache headers', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics'
-    } as any
+    const request = createRequest('http://localhost:3000/api/metrics')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
@@ -131,9 +102,7 @@ describe('GET /api/metrics - Authenticated Tests', () => {
   })
 
   it('handles errors gracefully', async () => {
-    const request = {
-      url: 'http://localhost:3000/api/metrics'
-    } as any
+    const request = createRequest('http://localhost:3000/api/metrics')
 
     const response = await GET(request)
     assert.equal(response.status, 200)
