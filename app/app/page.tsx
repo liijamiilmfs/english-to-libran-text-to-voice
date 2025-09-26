@@ -174,16 +174,17 @@ export default function AppPage() {
         throw new Error(errorData.error || 'Failed to generate audio')
       }
 
-      const data = await response.json()
-      const audioBase64 = data.audioContent
-      const provider = data.provider
-      const voiceLabel = data.voiceLabel
-      const fallback = data.fallback
-
-      const audioBlob = new Blob([Buffer.from(audioBase64, 'base64')], { type: 'audio/mpeg' })
+      // The API returns a binary audio stream, not JSON
+      const audioBlob = await response.blob()
       const url = URL.createObjectURL(audioBlob)
       setAudioUrl(url)
       setAudioBlob(audioBlob)
+      
+      // Extract metadata from response headers
+      const provider = response.headers.get('X-TTS-Provider') || 'openai'
+      const voiceLabel = response.headers.get('X-Voice-Label') || selectedVoice?.name || 'unknown'
+      const fallback = response.headers.get('X-Fallback-Used') === 'true'
+      
       setTtsProviderInfo({ provider, voiceLabel, fallback })
     } catch (error) {
       console.error('Error generating audio:', error)
