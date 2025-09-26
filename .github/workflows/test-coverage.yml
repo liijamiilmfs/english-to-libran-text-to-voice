@@ -25,7 +25,16 @@ jobs:
           cache: 'npm'
           
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Fix for Rollup native binary dependency issue
+          rm -f package-lock.json
+          rm -rf node_modules
+          npm install --no-optional
+          
+      - name: Install Rollup native binary
+        run: |
+          # Explicitly install the correct Rollup native binary for Linux x64
+          npm install @rollup/rollup-linux-x64-gnu@latest --save-optional
         
       - name: Run tests with coverage
         run: npm run test:coverage
