@@ -42,7 +42,7 @@ export default function VoicePreview({
       setAudioUrl(null)
       setIsPlaying(false)
     }
-  }, [voice?.id, voiceFilter?.id, accent])
+  }, [voice?.id, voiceFilter?.id, accent, audioUrl])
 
   const handlePreview = async () => {
     if (!sampleText.trim()) return

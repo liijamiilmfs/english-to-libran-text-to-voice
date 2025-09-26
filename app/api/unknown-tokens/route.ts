@@ -13,23 +13,31 @@ async function handleGet(request: NextRequest) {
     
     switch (action) {
       case 'list':
-        const tokens = await unknownTokenLogger.getUnknownTokens();
+        const tokenList = await unknownTokenLogger.getUnknownTokens();
         return NextResponse.json({ 
           success: true, 
-          data: tokens,
-          count: tokens.length 
+          data: tokenList,
+          count: tokenList.length 
         });
         
       case 'export':
-        const exportData = await unknownTokenLogger.exportTokens();
+        const exportTokens = await unknownTokenLogger.getUnknownTokens();
         return NextResponse.json({ 
           success: true, 
-          data: exportData,
-          count: exportData.length 
+          data: exportTokens,
+          count: exportTokens.length 
         });
         
       case 'stats':
-        const stats = await unknownTokenLogger.getTokenStats();
+        const tokenStats = await unknownTokenLogger.getUnknownTokens();
+        const stats = {
+          totalTokens: tokenStats.length,
+          uniqueTokens: new Set(tokenStats.map(t => t.token)).size,
+          variants: {
+            ancient: tokenStats.filter(t => t.variant === 'ancient').length,
+            modern: tokenStats.filter(t => t.variant === 'modern').length
+          }
+        };
         return NextResponse.json({ 
           success: true, 
           data: stats 
@@ -62,12 +70,12 @@ async function handlePost(request: NextRequest) {
       }, { status: 400 });
     }
     
-    await unknownTokenLogger.logUnknownToken(token, variant, {
+    await unknownTokenLogger.logUnknownToken({
+      token,
+      variant,
       context: context || '',
       userAgent: userAgent || request.headers.get('user-agent') || 'unknown',
-      sessionId: sessionId || 'unknown',
-      timestamp: new Date().toISOString(),
-      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+      sessionId: sessionId || 'unknown'
     });
     
     return NextResponse.json({ 

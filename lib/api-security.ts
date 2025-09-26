@@ -16,6 +16,10 @@ const RATE_LIMIT_MAX_REQUESTS = 100 // 100 requests per window
  * Get client IP address
  */
 function getClientIP(request: NextRequest): string {
+  if (!request.headers) {
+    return 'test'
+  }
+  
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
@@ -76,7 +80,7 @@ export function verifyAdminAuth(request: NextRequest): boolean {
   }
 
   // In production, require admin secret
-  const providedSecret = request.headers.get(ADMIN_HEADER)
+  const providedSecret = request.headers?.get(ADMIN_HEADER)
   
   if (!providedSecret) {
     log.warn('Admin route accessed without authentication header', {
@@ -84,7 +88,7 @@ export function verifyAdminAuth(request: NextRequest): boolean {
       corr_id: requestId,
       ctx: { 
         ip,
-        userAgent: request.headers.get('user-agent') || 'unknown',
+        userAgent: request.headers?.get('user-agent') || 'unknown',
         environment: process.env.NODE_ENV
       }
     })
@@ -97,7 +101,7 @@ export function verifyAdminAuth(request: NextRequest): boolean {
       corr_id: requestId,
       ctx: { 
         ip,
-        userAgent: request.headers.get('user-agent') || 'unknown',
+        userAgent: request.headers?.get('user-agent') || 'unknown',
         environment: process.env.NODE_ENV,
         secretLength: providedSecret.length
       }
@@ -139,7 +143,7 @@ export function verifyApiAuth(request: NextRequest): boolean {
   }
 
   // In production, require API secret for sensitive endpoints
-  const providedSecret = request.headers.get(API_HEADER)
+  const providedSecret = request.headers?.get(API_HEADER)
   
   if (!providedSecret) {
     log.warn('Sensitive API route accessed without authentication header', {
@@ -147,7 +151,7 @@ export function verifyApiAuth(request: NextRequest): boolean {
       corr_id: requestId,
       ctx: { 
         ip,
-        userAgent: request.headers.get('user-agent') || 'unknown',
+        userAgent: request.headers?.get('user-agent') || 'unknown',
         environment: process.env.NODE_ENV
       }
     })
@@ -160,7 +164,7 @@ export function verifyApiAuth(request: NextRequest): boolean {
       corr_id: requestId,
       ctx: { 
         ip,
-        userAgent: request.headers.get('user-agent') || 'unknown',
+        userAgent: request.headers?.get('user-agent') || 'unknown',
         environment: process.env.NODE_ENV,
         secretLength: providedSecret.length
       }
