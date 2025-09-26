@@ -5,11 +5,6 @@ let GET: (request: any) => Promise<Response>
 
 describe('GET /api/metrics - Authenticated Tests', () => {
   before(async () => {
-    // Set NODE_ENV to test to bypass authentication
-    const originalEnv = process.env.NODE_ENV
-    // @ts-ignore - Override for test environment
-    process.env.NODE_ENV = 'test'
-    
     const Module = require('module')
     const originalLoad = Module._load
 
@@ -48,6 +43,12 @@ describe('GET /api/metrics - Authenticated Tests', () => {
       if (request === '@/lib/metrics') {
         const metricsPath = `${process.cwd()}/dist-test/lib/metrics.js`
         return originalLoad(metricsPath, parent, isMain)
+      }
+
+      if (request === '@/lib/api-security') {
+        return {
+          withApiAuth: (handler: any) => handler // Bypass authentication in tests
+        }
       }
 
       return originalLoad(request, parent, isMain)
