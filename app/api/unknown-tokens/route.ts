@@ -1,42 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unknownTokenLogger } from '@/lib/unknown-token-logger';
 import { log } from '@/lib/logger';
+import { withApiAuth } from '@/lib/api-security';
 
 // Force dynamic rendering since we use request.url
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
     
     switch (action) {
       case 'list':
-        const tokens = await unknownTokenLogger.getUnknownTokens();
+        const tokenList = await unknownTokenLogger.getUnknownTokens();
         return NextResponse.json({ 
           success: true, 
-          data: tokens,
-          count: tokens.length 
+          data: tokenList,
+          count: tokenList.length 
         });
         
-      case 'frequency':
-        const frequency = await unknownTokenLogger.getTokenFrequency();
+      case 'export':
+        const exportTokens = await unknownTokenLogger.getUnknownTokens();
         return NextResponse.json({ 
           success: true, 
-          data: frequency 
+          data: exportTokens,
+          count: exportTokens.length 
         });
         
-      case 'clear':
-        await unknownTokenLogger.clearLog();
+      case 'stats':
+        const tokenStats = await unknownTokenLogger.getUnknownTokens();
+        const stats = {
+          totalTokens: tokenStats.length,
+          uniqueTokens: new Set(tokenStats.map(t => t.token)).size,
+          variants: {
+            ancient: tokenStats.filter(t => t.variant === 'ancient').length,
+            modern: tokenStats.filter(t => t.variant === 'modern').length
+          }
+        };
         return NextResponse.json({ 
           success: true, 
-          message: 'Unknown tokens log cleared' 
+          data: stats 
         });
         
       default:
         return NextResponse.json({ 
           success: false, 
-          error: 'Invalid action. Use: list, frequency, or clear' 
+          error: 'Invalid action. Use: list, export, or stats' 
         }, { status: 400 });
     }
   } catch (error) {
@@ -48,7 +58,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const { token, variant, context, userAgent, sessionId } = body;
@@ -63,9 +73,9 @@ export async function POST(request: NextRequest) {
     await unknownTokenLogger.logUnknownToken({
       token,
       variant,
-      context,
-      userAgent,
-      sessionId
+      context: context || '',
+      userAgent: userAgent || request.headers?.get('user-agent') || 'unknown',
+      sessionId: sessionId || 'unknown'
     });
     
     return NextResponse.json({ 
@@ -80,3 +90,7 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// Export secured handlers
+export const GET = withApiAuth(handleGet)
+export const POST = withApiAuth(handlePost)

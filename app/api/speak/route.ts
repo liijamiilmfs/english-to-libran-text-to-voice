@@ -7,6 +7,7 @@ import { withGuardrails } from '@/lib/api-guardrails'
 import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
 import { VOICE_PROFILES, Voice, selectVoiceForCharacteristics } from '@/lib/voices'
 import { validateVoiceFilter, characteristicsToTTSParams } from '@/lib/dynamic-voice-filter'
+import { withUniversalSecurity } from '@/lib/universal-security'
 
 
 async function handleSpeakRequest(request: NextRequest) {
@@ -302,8 +303,8 @@ async function handleSpeakRequest(request: NextRequest) {
 }
 
 // Export the guarded handler
-export const POST = withGuardrails(handleSpeakRequest, {
+export const POST = withUniversalSecurity(withGuardrails(handleSpeakRequest, {
   enableRateLimiting: true,
   enableBudgetGuardrails: true,
   requireUserId: false
-})
+}))

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { log, generateCorrelationId, LogEvents } from '@/lib/logger'
 import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
+import { withAdminAuth } from '@/lib/api-security'
 
 interface BulkOperationRequest {
   operation: string
@@ -263,7 +264,7 @@ async function exportEntries(dictionaryData: DictionaryData, entries: string[]):
 /**
  * Handle bulk dictionary operations with comprehensive error handling and logging
  */
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   const requestId = generateCorrelationId()
   log.apiRequest('POST', '/api/admin/dictionary/bulk', requestId)
 
@@ -371,7 +372,7 @@ export async function POST(request: NextRequest) {
 /**
  * Get bulk operation status or available operations
  */
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   const requestId = generateCorrelationId()
   log.apiRequest('GET', '/api/admin/dictionary/bulk', requestId)
 
@@ -410,3 +411,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(errorResponse.body, { status: errorResponse.status })
   }
 }
+
+// Export secured handlers
+export const GET = withAdminAuth(handleGet)
+export const POST = withAdminAuth(handlePost)
