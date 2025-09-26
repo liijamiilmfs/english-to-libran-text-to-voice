@@ -6,6 +6,7 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET || 'dev-admin-secret-change-in-pro
 const API_SECRET = process.env.API_SECRET || 'dev-api-secret-change-in-production'
 const ADMIN_HEADER = 'X-Admin-Secret'
 const API_HEADER = 'X-API-Secret'
+const IS_TEST_ENV = process.env.NODE_ENV === 'test'
 
 // Rate limiting (simple in-memory store - use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
@@ -133,9 +134,9 @@ export function verifyApiAuth(request: NextRequest): boolean {
     return false
   }
   
-  // In development, allow without auth for local testing
-  if (process.env.NODE_ENV === 'development') {
-    log.debug('API auth bypassed in development mode', {
+  // In development or test, allow without auth for local testing
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    log.debug('API auth bypassed in development/test mode', {
       corr_id: requestId,
       ctx: { environment: process.env.NODE_ENV, ip }
     })

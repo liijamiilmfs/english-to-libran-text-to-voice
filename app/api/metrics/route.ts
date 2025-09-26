@@ -14,7 +14,21 @@ async function handleGet(request: NextRequest) {
 
   try {
     const url = new URL(request.url)
-    const format = url.searchParams.get('format') as 'json' | 'prometheus' | 'text' || 'json'
+    const formatParam = url.searchParams.get('format')
+    const validFormats = ['json', 'prometheus', 'text']
+    
+    // Validate format parameter
+    if (formatParam && !validFormats.includes(formatParam)) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Invalid format parameter. Must be json, prometheus, or text'
+        },
+        { status: 400 }
+      )
+    }
+    
+    const format = (formatParam as 'json' | 'prometheus' | 'text') || 'json'
     
     log.info('Metrics request', {
       event: 'METRICS_REQUEST',
@@ -37,7 +51,10 @@ async function handleGet(request: NextRequest) {
 
     const headers: Record<string, string> = {
       'Content-Type': format === 'prometheus' ? 'text/plain; version=0.0.4; charset=utf-8' : 
-                      format === 'text' ? 'text/plain; charset=utf-8' : 'application/json'
+                      format === 'text' ? 'text/plain; charset=utf-8' : 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     }
 
     return new NextResponse(metrics, { 
