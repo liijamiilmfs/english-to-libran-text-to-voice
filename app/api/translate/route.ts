@@ -4,6 +4,7 @@ import { metrics } from '@/lib/metrics'
 import { log, generateCorrelationId, LogEvents } from '@/lib/logger'
 import { withGuardrails } from '@/lib/api-guardrails'
 import { ErrorCode, createErrorResponse } from '@/lib/error-taxonomy'
+import { withUniversalSecurity } from '@/lib/universal-security'
 
 async function handleTranslateRequest(request: NextRequest) {
   const startTime = Date.now()
@@ -100,8 +101,8 @@ async function handleTranslateRequest(request: NextRequest) {
 }
 
 // Export the guarded handler
-export const POST = withGuardrails(handleTranslateRequest, {
+export const POST = withUniversalSecurity(withGuardrails(handleTranslateRequest, {
   enableRateLimiting: true,
   enableBudgetGuardrails: true,
   requireUserId: false
-})
+}))
