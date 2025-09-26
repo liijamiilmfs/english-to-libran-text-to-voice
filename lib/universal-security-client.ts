@@ -160,7 +160,11 @@ export function pageSecurityMiddleware(request: NextRequest): NextResponse | nul
   // For ALL other routes (including /test-memory, /app, etc.), require authentication
   // Redirect to hero page for unauthenticated users
   if (!verifyApiAuth(request)) {
-    return NextResponse.redirect(new URL('/hero?error=authentication_required', request.url))
+    // Check if we're already on the hero page to prevent redirect loops
+    if (pathname === '/hero') {
+      return null // Allow hero page to load even without auth
+    }
+    return NextResponse.redirect(new URL('/hero', request.url))
   }
 
   return null

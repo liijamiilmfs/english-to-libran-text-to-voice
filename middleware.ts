@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   }
   
   // If no redirect/block, add security headers and continue
-  const response = NextResponse.next()
+  const response = new NextResponse(null)
   const securityHeaders = getSecurityHeaders()
   
   Object.entries(securityHeaders).forEach(([key, value]) => {
