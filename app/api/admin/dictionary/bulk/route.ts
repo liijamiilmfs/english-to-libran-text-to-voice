@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { withAdminAuth } from '@/lib/api-security'
 
 interface BulkOperationRequest {
   operation: string
@@ -8,7 +9,7 @@ interface BulkOperationRequest {
   data?: any
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body: BulkOperationRequest = await request.json()
     const { operation, entries, data } = body
@@ -210,3 +211,6 @@ async function exportEntries(dictionaryData: any, entries: string[]): Promise<Ne
     data: exportData
   })
 }
+
+// Export secured handler
+export const POST = withAdminAuth(handlePost)

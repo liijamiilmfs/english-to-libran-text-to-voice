@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unknownTokenLogger } from '@/lib/unknown-token-logger';
 import { log } from '@/lib/logger';
+import { withApiAuth } from '@/lib/api-security';
 
 // Force dynamic rendering since we use request.url
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -19,24 +20,25 @@ export async function GET(request: NextRequest) {
           count: tokens.length 
         });
         
-      case 'frequency':
-        const frequency = await unknownTokenLogger.getTokenFrequency();
+      case 'export':
+        const exportData = await unknownTokenLogger.exportTokens();
         return NextResponse.json({ 
           success: true, 
-          data: frequency 
+          data: exportData,
+          count: exportData.length 
         });
         
-      case 'clear':
-        await unknownTokenLogger.clearLog();
+      case 'stats':
+        const stats = await unknownTokenLogger.getTokenStats();
         return NextResponse.json({ 
           success: true, 
-          message: 'Unknown tokens log cleared' 
+          data: stats 
         });
         
       default:
         return NextResponse.json({ 
           success: false, 
-          error: 'Invalid action. Use: list, frequency, or clear' 
+          error: 'Invalid action. Use: list, export, or stats' 
         }, { status: 400 });
     }
   } catch (error) {
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const { token, variant, context, userAgent, sessionId } = body;
@@ -60,12 +62,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    await unknownTokenLogger.logUnknownToken({
-      token,
-      variant,
-      context,
-      userAgent,
-      sessionId
+    await unknownTokenLogger.logUnknownToken(token, variant, {
+      context: context || '',
+      userAgent: userAgent || request.headers.get('user-agent') || 'unknown',
+      sessionId: sessionId || 'unknown',
+      timestamp: new Date().toISOString(),
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     });
     
     return NextResponse.json({ 
@@ -80,3 +82,7 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// Export secured handlers
+export const GET = withApiAuth(handleGet)
+export const POST = withApiAuth(handlePost)

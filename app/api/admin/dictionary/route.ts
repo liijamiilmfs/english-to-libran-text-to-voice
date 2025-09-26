@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { withAdminAuth } from '@/lib/api-security'
 
 interface DictionaryEntry {
   english: string
@@ -22,7 +23,7 @@ interface DictionaryMetadata {
   sections: Record<string, number>
 }
 
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   try {
     // Load the unified dictionary
     const dictionaryPath = join(process.cwd(), 'data', 'UnifiedLibranDictionaryv1.7.0.json')
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json()
     const { action, entry } = body
@@ -129,3 +130,7 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Export secured handlers
+export const GET = withAdminAuth(handleGet)
+export const POST = withAdminAuth(handlePost)

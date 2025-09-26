@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ttsCache } from '@/lib/tts-cache';
 import { log } from '@/lib/logger';
+import { withApiAuth } from '@/lib/api-security';
 
 // Force dynamic rendering since we use request.url
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -19,25 +20,61 @@ export async function GET(request: NextRequest) {
         const entries = await ttsCache.getCacheEntries();
         return NextResponse.json({ success: true, data: entries, count: entries.length });
 
-      case 'clear':
-        await ttsCache.clearCache();
-        return NextResponse.json({ success: true, message: 'TTS cache cleared successfully' });
+      case 'size':
+        const size = await ttsCache.getCacheSize();
+        return NextResponse.json({ success: true, data: { size } });
 
       default:
-        return NextResponse.json({ success: false, error: 'Invalid action. Use: stats, entries, or clear' }, { status: 400 });
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Invalid action. Use: stats, entries, or size' 
+        }, { status: 400 });
     }
   } catch (error) {
-    log.error('TTS cache API error', { error: error instanceof Error ? error.message : String(error) });
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    log.error('TTS Cache API error', { error: error instanceof Error ? error.message : String(error) });
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Internal server error' 
+    }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
-    await ttsCache.clearCache();
-    return NextResponse.json({ success: true, message: 'TTS cache cleared successfully' });
+    const body = await request.json();
+    const { action } = body;
+
+    switch (action) {
+      case 'clear':
+        await ttsCache.clearCache();
+        return NextResponse.json({ 
+          success: true, 
+          message: 'TTS cache cleared successfully' 
+        });
+
+      case 'cleanup':
+        const cleanedCount = await ttsCache.cleanupExpiredEntries();
+        return NextResponse.json({ 
+          success: true, 
+          message: `${cleanedCount} expired entries cleaned up`,
+          cleanedCount 
+        });
+
+      default:
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Invalid action. Use: clear or cleanup' 
+        }, { status: 400 });
+    }
   } catch (error) {
-    log.error('TTS cache clear error', { error: error instanceof Error ? error.message : String(error) });
-    return NextResponse.json({ success: false, error: 'Failed to clear cache' }, { status: 500 });
+    log.error('TTS Cache API error', { error: error instanceof Error ? error.message : String(error) });
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Internal server error' 
+    }, { status: 500 });
   }
 }
+
+// Export secured handlers
+export const GET = withApiAuth(handleGet)
+export const POST = withApiAuth(handlePost)
