@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { pageSecurityMiddleware, getSecurityHeaders } from './lib/universal-security-client'
 
 export function middleware(request: NextRequest) {
   console.log('Middleware running for:', request.url)
   
-  // Temporarily disable security middleware for debugging
-  return new NextResponse(null)
+  // Apply universal security middleware
+  const securityResponse = pageSecurityMiddleware(request)
+  if (securityResponse) {
+    return securityResponse
+  }
+  
+  // If no redirect/block, add security headers and continue
+  const response = NextResponse.next()
+  const securityHeaders = getSecurityHeaders()
+  
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+  
+  return response
 }
 
 export const config = {

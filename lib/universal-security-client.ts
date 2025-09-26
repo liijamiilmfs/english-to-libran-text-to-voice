@@ -11,6 +11,7 @@ const IS_DEV_ENV = process.env.NODE_ENV === 'development'
 // Public routes that don't require authentication
 const PUBLIC_ROUTES = [
   '/',
+  '/hero',
   '/auth/signin',
   '/auth/error',
   '/api/auth/[...nextauth]'
@@ -148,9 +149,18 @@ export function pageSecurityMiddleware(request: NextRequest): NextResponse | nul
     return null
   }
 
-  // For all other routes, require API authentication
+  // For API routes, check API authentication
+  if (isApiRoute(pathname)) {
+    if (!verifyApiAuth(request)) {
+      return createUnauthorizedResponse('API authentication required', request)
+    }
+    return null
+  }
+
+  // For ALL other routes (including /test-memory, /app, etc.), require authentication
+  // Redirect to hero page for unauthenticated users
   if (!verifyApiAuth(request)) {
-    return NextResponse.redirect(new URL('/auth/signin?error=authentication_required', request.url))
+    return NextResponse.redirect(new URL('/hero?error=authentication_required', request.url))
   }
 
   return null
