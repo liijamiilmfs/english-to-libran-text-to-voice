@@ -10,15 +10,9 @@ export function middleware(request: NextRequest) {
     return securityResponse
   }
   
-  // If no redirect/block, add security headers and continue
-  const response = new NextResponse(null)
-  const securityHeaders = getSecurityHeaders()
-  
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value)
-  })
-  
-  return response
+  // If no redirect/block, continue without adding headers for now
+  // (Security headers will be added by individual pages)
+  return undefined
 }
 
 export const config = {

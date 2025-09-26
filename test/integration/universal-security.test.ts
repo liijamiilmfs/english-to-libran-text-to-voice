@@ -1,5 +1,5 @@
 import { describe, it, before, after } from 'node:test'
-import assert from 'node:assert/strict'
+import assert from 'assert/strict'
 
 let withUniversalSecurity: any
 let pageSecurityMiddleware: any
