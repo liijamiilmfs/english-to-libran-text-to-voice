@@ -141,7 +141,7 @@ describe('AppPage', () => {
     render(<AppPage />)
     const select = screen.getByLabelText(/select voice/i)
     expect(select).toBeInTheDocument()
-    expect(select).toHaveValue('en-US')
+    expect((select as HTMLSelectElement).value).toBe('en-US')
   })
 
   it('changes voice selection', () => {
