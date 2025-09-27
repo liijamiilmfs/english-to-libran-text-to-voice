@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import '@testing-library/jest-dom'
 
 // Mock console methods to reduce noise in tests
 global.console = {
