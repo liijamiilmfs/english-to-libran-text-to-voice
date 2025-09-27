@@ -1,7 +1,7 @@
 'use client'
 
 import type { Phrase, PhraseCategory, PhraseDifficulty, PhraseFilter } from '@/lib/types/phrase'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 interface PhrasePickerProps {
   onPhraseSelect: (phrase: Phrase, variant: 'ancient' | 'modern') => void
@@ -18,6 +18,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
     search: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingAction, setLoadingAction] = useState<'list' | 'random' | null>(null)
   const [selectedVariant, setSelectedVariant] = useState<'ancient' | 'modern'>('ancient')
   const [selectedPhrase, setSelectedPhrase] = useState<Phrase | null>(null)
 
@@ -42,6 +43,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
 
   const loadPhrases = useCallback(async () => {
     setIsLoading(true)
+    setLoadingAction('list')
     onLoadingChange(true)
 
     try {
@@ -63,6 +65,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
       console.error('Failed to load phrases', error)
     } finally {
       setIsLoading(false)
+      setLoadingAction(null)
       onLoadingChange(false)
     }
   }, [filter.category, filter.difficulty, filter.search, onLoadingChange])
@@ -74,6 +77,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
 
   const loadRandomPhrase = async () => {
     setIsLoading(true)
+    setLoadingAction('random')
     onLoadingChange(true)
 
     try {
@@ -94,6 +98,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
       console.error('Failed to load random phrase', error)
     } finally {
       setIsLoading(false)
+      setLoadingAction(null)
       onLoadingChange(false)
     }
   }
@@ -205,23 +210,37 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
           <button
             onClick={loadPhrases}
             disabled={isLoading}
+            aria-label="Load Phrases"
+            aria-busy={loadingAction === 'list'}
             className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            {isLoading ? 'Loading...' : 'Filter'}
+            <span className="font-medium">Load Phrases</span>
+            {loadingAction === 'list' && (
+              <span aria-hidden="true" className="ml-2 text-xs uppercase tracking-wide">Loading...</span>
+            )}
           </button>
           <button
             onClick={loadRandomPhrase}
             disabled={isLoading}
+            aria-label="Load Random Phrase"
+            aria-busy={loadingAction === 'random'}
             className="flex-1 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            {isLoading ? 'Loading...' : 'Random'}
+            <span className="font-medium">Load Random Phrase</span>
+            {loadingAction === 'random' && (
+              <span aria-hidden="true" className="ml-2 text-xs uppercase tracking-wide">Loading...</span>
+            )}
           </button>
         </div>
       </div>
 
       {/* Selected Phrase Display */}
       {selectedPhrase && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div
+          className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold text-blue-900">Selected Phrase</h3>
             <div className="flex space-x-2">
@@ -250,46 +269,53 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
       )}
 
       {/* Phrase List */}
-      <div className="space-y-2 max-h-80 overflow-y-auto">
-        {phrases.map((phrase) => (
-          <div
-            key={phrase.id}
-            onClick={() => handlePhraseClick(phrase)}
-            className={`p-2 border rounded-md cursor-pointer transition-colors text-sm ${selectedPhrase?.id === phrase.id
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-200 hover:bg-gray-50'
-              }`}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1">
-                <div className="font-medium text-gray-900">
-                  {phrase.english}
+      <div className="space-y-2 max-h-80 overflow-y-auto" role="region" aria-live="polite">
+        <ul className="space-y-2" role="list">
+          {phrases.map((phrase) => (
+            <li key={phrase.id}>
+              <button
+                type="button"
+                onClick={() => handlePhraseClick(phrase)}
+                className={`w-full text-left p-2 border rounded-md transition-colors text-sm ${
+                  selectedPhrase?.id === phrase.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}
+                aria-pressed={selectedPhrase?.id === phrase.id}
+                aria-label={`Select phrase: ${phrase.english}`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">
+                      {phrase.english}
+                    </div>
+                    <div className="text-base font-semibold text-blue-600 mt-1">
+                      {getPhraseText(phrase)}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {phrase.context}
+                    </div>
+                  </div>
+                  <div className="flex space-x-2 ml-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(phrase.difficulty)}`}>
+                      {phrase.difficulty}
+                    </span>
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                      {formatCategoryName(phrase.category)}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-base font-semibold text-blue-600 mt-1">
-                  {getPhraseText(phrase)}
-                </div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {phrase.context}
-                </div>
-              </div>
-              <div className="flex space-x-2 ml-4">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(phrase.difficulty)}`}>
-                  {phrase.difficulty}
-                </span>
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                  {formatCategoryName(phrase.category)}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+              </button>
+            </li>
+          ))}
+        </ul>
 
-      {phrases.length === 0 && !isLoading && (
-        <div className="text-center py-8 text-gray-500">
-          No phrases found. Try adjusting your filters.
-        </div>
-      )}
+        {phrases.length === 0 && !isLoading && (
+          <div className="text-center py-8 text-gray-500">
+            No phrases found. Try adjusting your filters.
+          </div>
+        )}
+      </div>
     </div>
   )
 }
