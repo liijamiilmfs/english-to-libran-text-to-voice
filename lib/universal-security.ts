@@ -29,7 +29,7 @@ const ADMIN_ROUTES = [
   '/api/admin'
 ]
 
-// API routes that require API secret
+// API routes that require API secret or user authentication
 const API_ROUTES = [
   '/api/translate',
   '/api/speak',
@@ -38,7 +38,8 @@ const API_ROUTES = [
   '/api/tts-cache',
   '/api/unknown-tokens',
   '/api/metrics',
-  '/api/guardrails-status'
+  '/api/guardrails-status',
+  '/api/user'
 ]
 
 /**
