@@ -1,7 +1,7 @@
 'use client'
 
 import type { Phrase, PhraseCategory, PhraseDifficulty, PhraseFilter } from '@/lib/types/phrase'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface PhrasePickerProps {
   onPhraseSelect: (phrase: Phrase, variant: 'ancient' | 'modern') => void
@@ -276,11 +276,10 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
               <button
                 type="button"
                 onClick={() => handlePhraseClick(phrase)}
-                className={`w-full text-left p-2 border rounded-md transition-colors text-sm ${
-                  selectedPhrase?.id === phrase.id
+                className={`w-full text-left p-2 border rounded-md transition-colors text-sm ${selectedPhrase?.id === phrase.id
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:bg-gray-50'
-                }`}
+                  }`}
                 aria-pressed={selectedPhrase?.id === phrase.id}
                 aria-label={`Select phrase: ${phrase.english}`}
               >

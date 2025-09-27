@@ -2,7 +2,7 @@
 
 import { formatFileSize, generateFilename } from '@/lib/clipboard-utils'
 import { BookOpen, Calendar, FileText, Hash } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import CopyButton from './CopyButton'
 
 interface TranslationResultProps {
