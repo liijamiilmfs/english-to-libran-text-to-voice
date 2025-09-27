@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { log, generateCorrelationId } from '@/lib/logger'
+import { generateCorrelationId, log } from '@/lib/logger'
 import { getToken } from 'next-auth/jwt'
+import { NextRequest, NextResponse } from 'next/server'
 
 // Security configuration
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'dev-admin-secret-change-in-production'
@@ -38,7 +38,11 @@ const API_ROUTES = [
   '/api/tts-cache',
   '/api/unknown-tokens',
   '/api/metrics',
-  '/api/guardrails-status',
+  '/api/guardrails-status'
+]
+
+// User-specific routes that only require user authentication (NextAuth)
+const USER_ROUTES = [
   '/api/user'
 ]
 
@@ -49,7 +53,7 @@ function getClientIP(request: NextRequest): string {
   if (!request.headers) {
     return 'test'
   }
-  
+
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
@@ -64,9 +68,9 @@ function getClientIP(request: NextRequest): string {
 function checkRateLimit(request: NextRequest): boolean {
   const ip = getClientIP(request)
   const now = Date.now()
-  
+
   const clientData = rateLimitStore.get(ip)
-  
+
   if (!clientData || now > clientData.resetTime) {
     // Reset or create new entry
     rateLimitStore.set(ip, {
@@ -75,7 +79,7 @@ function checkRateLimit(request: NextRequest): boolean {
     })
     return true
   }
-  
+
   if (clientData.count >= RATE_LIMIT_MAX_REQUESTS) {
     log.warn('Rate limit exceeded', {
       event: 'RATE_LIMIT_EXCEEDED',
@@ -84,7 +88,7 @@ function checkRateLimit(request: NextRequest): boolean {
     })
     return false
   }
-  
+
   // Increment counter
   clientData.count++
   rateLimitStore.set(ip, clientData)
@@ -95,7 +99,7 @@ function checkRateLimit(request: NextRequest): boolean {
  * Check if route is public
  */
 function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => 
+  return PUBLIC_ROUTES.some(route =>
     pathname === route || pathname.startsWith(route + '/')
   )
 }
@@ -104,7 +108,7 @@ function isPublicRoute(pathname: string): boolean {
  * Check if route is admin route
  */
 function isAdminRoute(pathname: string): boolean {
-  return ADMIN_ROUTES.some(route => 
+  return ADMIN_ROUTES.some(route =>
     pathname.startsWith(route)
   )
 }
@@ -113,7 +117,13 @@ function isAdminRoute(pathname: string): boolean {
  * Check if route is API route
  */
 function isApiRoute(pathname: string): boolean {
-  return API_ROUTES.some(route => 
+  return API_ROUTES.some(route =>
+    pathname.startsWith(route)
+  )
+}
+
+function isUserRoute(pathname: string): boolean {
+  return USER_ROUTES.some(route =>
     pathname.startsWith(route)
   )
 }
@@ -174,21 +184,21 @@ async function verifyUserAuth(request: NextRequest): Promise<boolean> {
  */
 function createUnauthorizedResponse(message: string, request: NextRequest): NextResponse {
   const corrId = generateCorrelationId()
-  
+
   log.warn('Unauthorized access attempt', {
     event: 'UNAUTHORIZED_ACCESS',
     corr_id: corrId,
-    ctx: { 
+    ctx: {
       ip: getClientIP(request),
       userAgent: request.headers.get('user-agent'),
-        path: new URL(request.url).pathname,
+      path: new URL(request.url).pathname,
       method: request.method
     }
   })
 
   return NextResponse.json(
-    { 
-      success: false, 
+    {
+      success: false,
       error: message,
       corr_id: corrId
     },
@@ -201,20 +211,20 @@ function createUnauthorizedResponse(message: string, request: NextRequest): Next
  */
 function createRateLimitResponse(request: NextRequest): NextResponse {
   const corrId = generateCorrelationId()
-  
+
   log.warn('Rate limit exceeded', {
     event: 'RATE_LIMIT_EXCEEDED',
     corr_id: corrId,
-    ctx: { 
+    ctx: {
       ip: getClientIP(request),
-        path: new URL(request.url).pathname,
+      path: new URL(request.url).pathname,
       method: request.method
     }
   })
 
   return NextResponse.json(
-    { 
-      success: false, 
+    {
+      success: false,
       error: 'Rate limit exceeded. Please try again later.',
       corr_id: corrId
     },
@@ -262,9 +272,25 @@ export function withUniversalSecurity(handler: (request: NextRequest) => Promise
       if (!verifyAdminAuth(request)) {
         return createUnauthorizedResponse('Admin access required', request)
       }
-      
+
       log.debug('Admin route accessed', {
         event: 'ADMIN_ROUTE_ACCESS',
+        corr_id: corrId,
+        ctx: { path: pathname }
+      })
+      return handler(request)
+    }
+
+    // Check user-specific routes (only require NextAuth)
+    if (isUserRoute(pathname)) {
+      const isUserAuthenticated = await verifyUserAuth(request)
+
+      if (!isUserAuthenticated) {
+        return createUnauthorizedResponse('User authentication required', request)
+      }
+
+      log.debug('User route accessed', {
+        event: 'USER_ROUTE_ACCESS',
         corr_id: corrId,
         ctx: { path: pathname }
       })
@@ -275,15 +301,15 @@ export function withUniversalSecurity(handler: (request: NextRequest) => Promise
     if (isApiRoute(pathname)) {
       const isUserAuthenticated = await verifyUserAuth(request)
       const isApiSecretValid = verifyApiAuth(request)
-      
+
       if (!isUserAuthenticated && !isApiSecretValid) {
         return createUnauthorizedResponse('Authentication required', request)
       }
-      
+
       log.debug('API route accessed', {
         event: 'API_ROUTE_ACCESS',
         corr_id: corrId,
-        ctx: { 
+        ctx: {
           path: pathname,
           authType: isUserAuthenticated ? 'user' : 'api_secret'
         }
