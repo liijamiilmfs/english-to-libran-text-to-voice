@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
 import type { Phrase, PhraseCategory, PhraseDifficulty, PhraseFilter } from '@/lib/types/phrase'
+import { useCallback, useEffect, useState } from 'react'
 
 interface PhrasePickerProps {
   onPhraseSelect: (phrase: Phrase, variant: 'ancient' | 'modern') => void
@@ -136,8 +136,8 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
             <button
               onClick={() => setSelectedVariant('ancient')}
               className={`px-3 py-1 rounded text-sm ${selectedVariant === 'ancient'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
             >
               Ancient
@@ -145,8 +145,8 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
             <button
               onClick={() => setSelectedVariant('modern')}
               className={`px-3 py-1 rounded text-sm ${selectedVariant === 'modern'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
             >
               Modern
@@ -256,8 +256,8 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
             key={phrase.id}
             onClick={() => handlePhraseClick(phrase)}
             className={`p-2 border rounded-md cursor-pointer transition-colors text-sm ${selectedPhrase?.id === phrase.id
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:bg-gray-50'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 hover:bg-gray-50'
               }`}
           >
             <div className="flex justify-between items-start mb-2">
