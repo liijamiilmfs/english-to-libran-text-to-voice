@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import type { Phrase, PhraseFilter, PhraseCategory, PhraseDifficulty } from '@/lib/types/phrase'
+import React, { useCallback, useEffect, useState } from 'react'
+import type { Phrase, PhraseCategory, PhraseDifficulty, PhraseFilter } from '@/lib/types/phrase'
 
 interface PhrasePickerProps {
   onPhraseSelect: (phrase: Phrase, variant: 'ancient' | 'modern') => void
@@ -43,7 +43,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
   const loadPhrases = useCallback(async () => {
     setIsLoading(true)
     onLoadingChange(true)
-    
+
     try {
       const params = new URLSearchParams({
         action: 'list',
@@ -55,7 +55,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
 
       const response = await fetch(`/api/phrases?${params}`)
       const data = await response.json()
-      
+
       if (data.success) {
         setPhrases(data.data)
       }
@@ -75,7 +75,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
   const loadRandomPhrase = async () => {
     setIsLoading(true)
     onLoadingChange(true)
-    
+
     try {
       const params = new URLSearchParams({
         action: 'random',
@@ -85,7 +85,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
 
       const response = await fetch(`/api/phrases?${params}`)
       const data = await response.json()
-      
+
       if (data.success && data.data) {
         setSelectedPhrase(data.data)
         onPhraseSelect(data.data, selectedVariant)
@@ -126,7 +126,7 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
 
   return (
     <div className="space-y-4">
-      
+
       {/* Controls */}
       <div className="space-y-3">
         {/* Variant Selection */}
@@ -135,21 +135,19 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
           <div className="flex space-x-2">
             <button
               onClick={() => setSelectedVariant('ancient')}
-              className={`px-3 py-1 rounded text-sm ${
-                selectedVariant === 'ancient'
+              className={`px-3 py-1 rounded text-sm ${selectedVariant === 'ancient'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+                }`}
             >
               Ancient
             </button>
             <button
               onClick={() => setSelectedVariant('modern')}
-              className={`px-3 py-1 rounded text-sm ${
-                selectedVariant === 'modern'
+              className={`px-3 py-1 rounded text-sm ${selectedVariant === 'modern'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+                }`}
             >
               Modern
             </button>
@@ -257,11 +255,10 @@ export default function PhrasePicker({ onPhraseSelect, onLoadingChange }: Phrase
           <div
             key={phrase.id}
             onClick={() => handlePhraseClick(phrase)}
-            className={`p-2 border rounded-md cursor-pointer transition-colors text-sm ${
-              selectedPhrase?.id === phrase.id
+            className={`p-2 border rounded-md cursor-pointer transition-colors text-sm ${selectedPhrase?.id === phrase.id
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:bg-gray-50'
-            }`}
+              }`}
           >
             <div className="flex justify-between items-start mb-2">
               <div className="flex-1">

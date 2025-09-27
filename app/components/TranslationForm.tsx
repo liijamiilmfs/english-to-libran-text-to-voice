@@ -2,7 +2,7 @@
 
 import { trackFeatureUsage, trackUserInteraction } from '@/lib/analytics'
 import { BookOpen, RefreshCw, Send } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // Client-side logging utility
 const log = {
