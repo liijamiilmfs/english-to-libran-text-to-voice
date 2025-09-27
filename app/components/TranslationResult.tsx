@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { BookOpen, FileText, Hash, Calendar } from 'lucide-react'
+import { formatFileSize, generateFilename } from '@/lib/clipboard-utils'
+import { BookOpen, Calendar, FileText, Hash } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import CopyButton from './CopyButton'
-import { generateFilename, formatFileSize } from '@/lib/clipboard-utils'
 
 interface TranslationResultProps {
   libranText: string
@@ -58,7 +58,7 @@ export default function TranslationResult({
             {libranText}
           </div>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
           <CopyButton

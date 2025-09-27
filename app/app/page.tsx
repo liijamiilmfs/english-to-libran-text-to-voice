@@ -1,23 +1,24 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Volume2 } from 'lucide-react'
-import { VoiceProfile, VoiceAccent } from '@/lib/voices'
+import { trackError, trackTranslation, trackVoiceGeneration } from '@/lib/analytics'
 import type { VoiceFilter } from '@/lib/dynamic-voice-filter'
-import TranslationForm from '../components/TranslationForm'
-import TranslationResult from '../components/TranslationResult'
-import AudioDownloadButton from '../components/AudioDownloadButton'
-import PhrasePicker from '../components/PhrasePicker'
-import IntegratedVoiceSelector from '../components/IntegratedVoiceSelector'
 import {
   SIMPLE_VOICE_OPTIONS,
-  getSimpleVoiceDefinition,
   SimpleVoiceId,
-  getDefaultSimpleVoice
+  getDefaultSimpleVoice,
+  getSimpleVoiceDefinition
 } from '@/lib/simple-voice-system'
 import type { Phrase } from '@/lib/types/phrase'
-import { useRouter } from 'next/navigation'
+import { VoiceAccent, VoiceProfile } from '@/lib/voices'
 import { motion } from 'framer-motion'
+import { Volume2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
+import AudioDownloadButton from '../components/AudioDownloadButton'
+import IntegratedVoiceSelector from '../components/IntegratedVoiceSelector'
+import PhrasePicker from '../components/PhrasePicker'
+import TranslationForm from '../components/TranslationForm'
+import TranslationResult from '../components/TranslationResult'
 
 // Helper function to convert voice characteristics to TTS parameters
 function characteristicsToTTSParams(characteristics: any) {
@@ -62,6 +63,9 @@ export default function AppPage() {
     if (translationData) {
       setTranslationData(translationData)
     }
+
+    // Track successful translation
+    trackTranslation(originalText.length, 'translation_api', true)
   }
 
   const handleVoiceChange = useCallback((voice: VoiceProfile | null, filter: VoiceFilter | null, accent: VoiceAccent | null) => {
@@ -115,6 +119,7 @@ export default function AppPage() {
   const handleGenerateAudio = async () => {
     if (!libranText) return
 
+    const startTime = Date.now()
     setIsGenerating(true)
     setAudioUrl('')
     setAudioBlob(null)
@@ -128,7 +133,7 @@ export default function AppPage() {
         if (!simpleVoiceDefinition) {
           throw new Error('Invalid voice selection')
         }
-        
+
         const requestData = {
           libranText,
           voice: simpleVoiceDefinition.id,
@@ -179,16 +184,31 @@ export default function AppPage() {
       const url = URL.createObjectURL(audioBlob)
       setAudioUrl(url)
       setAudioBlob(audioBlob)
-      
+
       // Extract metadata from response headers
       const provider = response.headers.get('X-TTS-Provider') || 'openai'
       const voiceLabel = response.headers.get('X-Voice-Label') || selectedVoice?.name || 'unknown'
       const fallback = response.headers.get('X-Fallback-Used') === 'true'
-      
+
       setTtsProviderInfo({ provider, voiceLabel, fallback })
+
+      // Track successful voice generation
+      const duration = Date.now() - startTime
+      const voiceId = selectedSimpleVoice || selectedVoice?.id || 'unknown'
+      trackVoiceGeneration(voiceId, provider, duration, true)
+
     } catch (error) {
       console.error('Error generating audio:', error)
       alert(`Failed to generate audio: ${(error as Error).message}`)
+
+      // Track failed voice generation
+      const duration = Date.now() - startTime
+      const voiceId = selectedSimpleVoice || selectedVoice?.id || 'unknown'
+      trackVoiceGeneration(voiceId, 'unknown', duration, false)
+      trackError('voice_generation_failed', error instanceof Error ? error.message : 'Unknown error', {
+        voice_id: voiceId,
+        text_length: libranText.length
+      })
     } finally {
       setIsGenerating(false)
     }
@@ -248,7 +268,7 @@ export default function AppPage() {
               <h2 className="text-xl font-semibold mb-4 text-libran-gold">
                 English to Librán Translation
               </h2>
-              
+
               <TranslationForm
                 onTranslation={handleTranslation}
                 onLoadingChange={setIsTranslating}
@@ -273,7 +293,7 @@ export default function AppPage() {
                 <h3 className="text-lg font-semibold mb-4 text-libran-gold">
                   Audio Output
                 </h3>
-                
+
                 {/* Voice Selection */}
                 <div className="mb-4 space-y-4">
                   <div className="bg-libran-darker border border-libran-gold/20 rounded-lg p-4">
@@ -297,11 +317,10 @@ export default function AppPage() {
                       {SIMPLE_VOICE_OPTIONS.map(voice => (
                         <label
                           key={voice.id}
-                          className={`flex items-start gap-3 rounded-md border p-3 transition-colors ${
-                            selectedSimpleVoice === voice.id
-                              ? 'border-libran-gold bg-libran-gold/10'
-                              : 'border-transparent hover:border-libran-gold/40'
-                          }`}
+                          className={`flex items-start gap-3 rounded-md border p-3 transition-colors ${selectedSimpleVoice === voice.id
+                            ? 'border-libran-gold bg-libran-gold/10'
+                            : 'border-transparent hover:border-libran-gold/40'
+                            }`}
                         >
                           <input
                             type="radio"
@@ -343,11 +362,10 @@ export default function AppPage() {
                         <p className="text-xs mt-1">Pick a quick ElevenLabs voice above or design a custom OpenAI voice.</p>
                       </div>
                     ) : (
-                      <div className={`p-3 rounded-lg ${
-                        simpleVoiceDefinition
-                          ? 'bg-libran-gold/10 border border-libran-gold/30'
-                          : 'bg-libran-accent/10 border border-libran-accent/30'
-                      }`}>
+                      <div className={`p-3 rounded-lg ${simpleVoiceDefinition
+                        ? 'bg-libran-gold/10 border border-libran-gold/30'
+                        : 'bg-libran-accent/10 border border-libran-accent/30'
+                        }`}>
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="font-medium text-white">{activeVoiceName}</div>

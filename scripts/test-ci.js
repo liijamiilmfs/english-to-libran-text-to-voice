@@ -26,7 +26,7 @@ try {
   console.log('✅ Test build passed');
 
   console.log('\n4. Running tests...');
-  execSync('npm run test:run', { stdio: 'inherit' });
+  execSync('npm run test:vitest:run', { stdio: 'inherit' });
   console.log('✅ Tests passed');
 
   console.log('\n5. Building application...');

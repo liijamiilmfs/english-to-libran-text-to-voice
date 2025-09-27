@@ -1,14 +1,15 @@
-import { defineConfig } from 'vitest/config'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { defineConfig } from 'vitest/config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
-    include: ['test/vitest/**/*.test.ts'], // Include only Vitest test files
+    environment: 'jsdom',
+    setupFiles: ['./test/setup.ts'],
+    include: ['test/**/*.test.{ts,tsx}'], // Include all test files
     exclude: ['node_modules', 'dist', 'dist-test', 'tools/dict_importer'],
     testTimeout: 10000,
     hookTimeout: 10000,

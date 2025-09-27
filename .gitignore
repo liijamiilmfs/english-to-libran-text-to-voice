@@ -247,3 +247,9 @@ docs/build_logs/
 # System files
 .DS_Store
 Thumbs.db
+
+# GitHub issue markdown files (generated from issues)
+docs/issues/*.md
+
+# Build output directories
+html/

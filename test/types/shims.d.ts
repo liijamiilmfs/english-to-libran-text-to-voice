@@ -1,3 +1,5 @@
+/// <reference path="../../types/module-shims.d.ts" />
+
 declare module 'fs' {
   export function readFileSync(path: string, options?: { encoding?: string } | string): string
   const fsDefault: {
@@ -49,6 +51,25 @@ declare module 'next/server' {
   export class NextRequest extends Request {}
   export class NextResponse extends Response {
     static json(data: any, init?: { status?: number }): NextResponse
+  }
+}
+
+import type {
+  Assertion as VitestAssertion,
+  AsymmetricMatchersContaining as VitestAsymmetricMatchersContaining
+} from 'vitest'
+
+declare module 'vitest' {
+  interface Assertion<T = any> extends VitestAssertion<T> {
+    toBeInTheDocument(): void
+    toHaveClass(...classNames: string[]): void
+    toHaveAttribute(attribute: string, value?: unknown): void
+  }
+
+  interface AsymmetricMatchersContaining extends VitestAsymmetricMatchersContaining {
+    toBeInTheDocument(): void
+    toHaveClass(...classNames: string[]): void
+    toHaveAttribute(attribute: string, value?: unknown): void
   }
 }
 
