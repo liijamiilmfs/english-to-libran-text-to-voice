@@ -344,6 +344,7 @@ export default function HeroPage() {
                     style={{ fontFamily: 'Cinzel, serif', letterSpacing: '0.1em' }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    type="button"
                     onClick={() => window.location.href = '/app'}
                   >
                     <Play className="mr-3" size={24} />
@@ -358,6 +359,7 @@ export default function HeroPage() {
                         onClick={() => setCurrentScene(index)}
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.8 }}
+                        type="button"
                       />
                     ))}
                   </div>
@@ -426,6 +428,7 @@ export default function HeroPage() {
               <ChevronRight
                 size={24}
                 className="text-blue-400/70 rotate-90"
+                data-testid="chevron-right-icon"
               />
             </motion.div>
           </motion.div>

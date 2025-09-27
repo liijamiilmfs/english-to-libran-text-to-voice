@@ -3,17 +3,23 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import HeroPage from '../../app/hero/page'
 
-// Mock framer-motion
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    h1: ({ children, ...props }: any) => <h1 {...props}>{children}</h1>,
-    h2: ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-    p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>
-  },
-  AnimatePresence: ({ children }: any) => children
-}))
+// Mock framer-motion so any motion.* call renders the corresponding HTML element
+vi.mock('framer-motion', () => {
+  const createComponent = (tag: string) => ({ children, ...props }: any) =>
+    React.createElement(tag, props, children)
+
+  const motionProxy = new Proxy(
+    {},
+    {
+      get: (_target, key: string) => createComponent(key)
+    }
+  )
+
+  return {
+    motion: motionProxy,
+    AnimatePresence: ({ children }: any) => <>{children}</>
+  }
+})
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({

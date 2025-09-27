@@ -18,12 +18,23 @@ vi.mock('next/navigation', () => ({
   useRouter: () => mockRouter
 }))
 
-// Mock framer-motion
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>
+// Mock framer-motion with a proxy so any motion.* element renders as its HTML tag
+vi.mock('framer-motion', () => {
+  const createComponent = (tag: string) => ({ children, ...props }: any) =>
+    React.createElement(tag, props, children)
+
+  const motionProxy = new Proxy(
+    {},
+    {
+      get: (_target, key: string) => createComponent(key)
+    }
+  )
+
+  return {
+    motion: motionProxy,
+    AnimatePresence: ({ children }: any) => <>{children}</>
   }
-}))
+})
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -82,7 +93,7 @@ vi.mock('../../app/components/IntegratedVoiceSelector', () => ({
       <button onClick={() => onVoiceChange(null, null, null)}>
         Change Voice
       </button>
-      <button onClick={() => onSimpleVoiceChange('alloy')}>
+      <button onClick={() => onSimpleVoiceChange('test-voice')}>
         Simple Voice
       </button>
     </div>
@@ -91,9 +102,26 @@ vi.mock('../../app/components/IntegratedVoiceSelector', () => ({
 
 // Mock the voice system
 vi.mock('../../lib/simple-voice-system', () => ({
-  SIMPLE_VOICE_OPTIONS: { alloy: { name: 'Alloy' } },
-  getSimpleVoiceDefinition: () => ({ name: 'Alloy' }),
-  getDefaultSimpleVoice: () => 'alloy'
+  SIMPLE_VOICE_OPTIONS: [
+    {
+      id: 'test-voice',
+      label: 'Test Voice',
+      description: 'A mocked simple voice option',
+      accent: 'neutral',
+      provider: 'elevenlabs'
+    }
+  ],
+  getSimpleVoiceDefinition: (voiceId: string) =>
+    voiceId
+      ? {
+          id: voiceId,
+          label: 'Test Voice',
+          description: 'A mocked simple voice option',
+          accent: 'neutral',
+          provider: 'elevenlabs'
+        }
+      : null,
+  getDefaultSimpleVoice: () => 'test-voice'
 }))
 
 // Mock fetch
