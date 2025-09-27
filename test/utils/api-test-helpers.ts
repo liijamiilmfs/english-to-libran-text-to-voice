@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { vi, expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 /**
  * Test utilities for API route integration testing
